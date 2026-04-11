@@ -1,0 +1,11 @@
+# Local scratch copies (hundreds of MB); not used by the app
+.tmp-assets-prev
+
+# Gallery files are served from public/assets/; src/assets mirrors for local workflow only
+src/assets
+
+# Gallery originals live in Blob; manifest is src/data/blobAssetUrls.json (npm run sync:blob).
+public/assets
+
+.cursor
+**/.DS_Store

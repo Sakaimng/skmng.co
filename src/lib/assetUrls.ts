@@ -1,12 +1,30 @@
+import blobAssetUrls from "@/data/blobAssetUrls.json";
+
+type BlobUrlMap = Record<string, string>;
+
+const blobUrls = blobAssetUrls as BlobUrlMap;
+
+function normalizedAssetKey(name: string) {
+  return name
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => decodeURIComponent(segment))
+    .join("/");
+}
+
 export function getAssetUrl(name: string, width?: number, quality = 78) {
-  const encoded = encodeURIComponent(name);
-  const params = new URLSearchParams();
+  void width;
+  void quality;
+  const key = normalizedAssetKey(name);
+  const fromBlob = blobUrls[key];
+  if (fromBlob) return fromBlob;
 
-  if (width) params.set("w", String(width));
-  if (quality) params.set("q", String(quality));
-
-  const query = params.toString();
-  return `/api/assets/${encoded}${query ? `?${query}` : ""}`;
+  const path = name
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  return `/assets/${path}`;
 }
 
 export function getAssetSrcSet(

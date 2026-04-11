@@ -6,9 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "upload:blob": "tsx scripts/upload-gallery-to-blob.ts",
+    "sync:blob": "tsx scripts/sync-blob-manifest.ts"
   },
   "dependencies": {
+    "@vercel/blob": "^2.3.3",
     "gsap": "^3.14.2",
     "lenis": "^1.3.21",
     "next": "16.2.2",
@@ -25,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
