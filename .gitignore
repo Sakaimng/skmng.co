@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local gallery binaries (served from public/assets at deploy; keep out of git)
+/public/assets/
+/src/assets/
+.tmp-assets-prev
+
+# editor / agent scratch
+.cursor
