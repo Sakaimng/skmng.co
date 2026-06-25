@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050505;
+  --foreground: #f4f4f5;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9em;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: #050505;
+  opacity: 0;
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+li,
+figcaption,
+a,
+button,
+input,
+textarea,
+select,
+label {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9em;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+button {
+  appearance: none;
+  background: transparent;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.home-gallery-scroller {
+  width: 100vw;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  touch-action: pan-x pinch-zoom;
+  overscroll-behavior: none;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+  scrollbar-width: none;
+}
+
+.home-gallery-card {
+  width: calc(100vw / 3);
+  min-width: calc(100vw / 3);
+  flex: 0 0 calc(100vw / 3);
+  height: 100vh;
+  transform-origin: center center;
+  will-change: auto;
+}
+
+.home-gallery-media {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.home-gallery-image {
+  height: 100%;
+  width: 100%;
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 0.22s ease-out;
+  backface-visibility: hidden;
+  contain: paint;
+}
+
+@supports (width: 100dvw) {
+  .home-gallery-scroller {
+    width: 100dvw;
+  }
+
+  .home-gallery-card {
+    width: calc(100dvw / 3);
+    min-width: calc(100dvw / 3);
+    flex-basis: calc(100dvw / 3);
+  }
+}
+
+@media (max-width: 767px) {
+  .home-gallery-card {
+    width: 100vw;
+    min-width: 100vw;
+    flex-basis: 100vw;
+  }
+
+  .home-gallery-image {
+    transition-duration: 0.18s;
+  }
+}
+
+@supports (width: 100dvw) {
+  @media (max-width: 767px) {
+    .home-gallery-card {
+      width: 100dvw;
+      min-width: 100dvw;
+      flex-basis: 100dvw;
+    }
+  }
+}
+
+.home-gallery-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.home-gallery-scroller:active {
+  cursor: grabbing;
+}
+
+.home-gallery-is-idle {
+  opacity: 0;
+}
+
+.archive-page-scroller,
+.archive-lightbox-scroller,
+.archive-thumb-rail {
+  scrollbar-width: none;
+}
+
+.archive-page-scroller::-webkit-scrollbar,
+.archive-lightbox-scroller::-webkit-scrollbar,
+.archive-thumb-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.archive-page-scroller,
+.archive-lightbox-scroller {
+  overscroll-behavior: none;
+}
+
+.archive-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.archive-grid-card {
+  position: relative;
+  height: calc(100vh / 6);
+  overflow: hidden;
+  transition: opacity 0.35s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: calc(100vh / 6);
+  contain: layout paint style;
+}
+
+.archive-grid-card-dimmed {
+  opacity: 0.16;
+}
+
+.archive-thumb {
+  height: 72px;
+  width: 56px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  opacity: 0.3;
+  transition: opacity 0.25s ease;
+}
+
+.archive-thumb.active {
+  opacity: 1;
+}
+
+.preloader-char,
+.nav-char {
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .archive-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .archive-grid-card {
+    height: calc(100vh / 9);
+    contain-intrinsic-size: calc(100vh / 9);
+  }
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+}
