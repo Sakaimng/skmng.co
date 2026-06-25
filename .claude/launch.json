@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "skmng-dev",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-lc", "cd SKMNG.CO && NODE_OPTIONS='--max-old-space-size=4096' npx next dev --turbo -p 3000 -H 127.0.0.1"],
+      "port": 3000
+    }
+  ]
+}
