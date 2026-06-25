@@ -6,12 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "upload:blob": "tsx scripts/upload-gallery-to-blob.ts",
-    "sync:blob": "tsx scripts/sync-blob-manifest.ts"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@vercel/blob": "^2.3.3",
     "gsap": "^3.14.2",
     "lenis": "^1.3.21",
     "next": "16.2.2",
