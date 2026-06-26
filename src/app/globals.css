@@ -1,8 +1,85 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #f4f4f5;
+  --color-white: #f6f6f6;
+  --color-black: #060606;
+  --background: var(--color-white);
+  --foreground: var(--color-black);
+  --chrome-overlay: var(--color-black);
+  --scroll-track: rgba(6, 6, 6, 0.18);
+  --scroll-beam: var(--color-black);
+  --home-gallery-chrome: var(--color-white);
+  --site-indicator-red: #e02020;
+  --selection-bg: rgba(6, 6, 6, 0.14);
+  --site-font-size: 0.81em;
+  --site-font-weight: 600;
+  --archive-grid-gap: 1px;
+  --archive-visible-rows: 3;
+}
+
+html.dark {
+  --background: var(--color-black);
+  --foreground: var(--color-white);
+  --chrome-overlay: var(--color-black);
+  --scroll-track: rgba(246, 246, 246, 0.3);
+  --scroll-beam: var(--color-white);
+  --selection-bg: rgba(246, 246, 246, 0.2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition {
+    transition: background-color 0.45s ease;
+  }
+
+  html.theme-transition body,
+  html.theme-transition body * {
+    transition:
+      color 0.45s ease,
+      background-color 0.45s ease,
+      border-color 0.45s ease;
+  }
+
+  html.theme-transition [data-preloader-root],
+  html.theme-transition [data-preloader-root] * {
+    transition: none !important;
+  }
+}
+
+/* Hard refresh / toolbar reload — instant blur + fade if GSAP cannot finish */
+html[data-hard-refresh-outro="1"] [data-page-shell] {
+  opacity: 0 !important;
+  filter: blur(18px) !important;
+}
+
+html[data-hard-refresh-outro="1"] [data-hard-refresh-overlay] {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html {
+  --site-chrome-text: var(--foreground);
+  --site-chrome-scroll-beam: var(--scroll-beam);
+  --site-chrome-scroll-track: var(--scroll-track);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: var(--site-font-size);
+}
+
+html:not(.dark) body[data-home-gallery-over-imagery="1"] {
+  --site-chrome-text: var(--home-gallery-chrome);
+  --site-chrome-scroll-beam: var(--home-gallery-chrome);
+  --site-chrome-scroll-track: rgba(246, 246, 246, 0.3);
+}
+
+/* Light mode: keep nav foreground until gallery track landing finishes */
+html:not(.dark) body[data-home-gallery-intro-pending="1"] {
+  --site-chrome-text: var(--foreground);
+  --site-chrome-scroll-beam: var(--scroll-beam);
+  --site-chrome-scroll-track: var(--scroll-track);
+}
+
+body[data-archive-chrome-bright="1"] {
+  --site-chrome-text: var(--home-gallery-chrome);
 }
 
 html,
@@ -10,19 +87,37 @@ body {
   overscroll-behavior: none;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  /* Matches body — no separate next/font file for sans (avoids unused preload). */
+  --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, sans-serif;
   --font-mono: var(--font-geist-mono);
+  --text-base: 1rem;
+  --text-xs: 1rem;
+  --text-sm: 1rem;
+  --text-lg: 1rem;
+  --text-xl: 1rem;
+  --text-2xl: 1rem;
+  --text-3xl: 1rem;
+  --text-4xl: 1rem;
+  --text-5xl: 1rem;
+  --text-6xl: 1rem;
+  --text-7xl: 1rem;
+  --text-8xl: 1rem;
+  --text-9xl: 1rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 0.9em;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: var(--site-font-weight);
   letter-spacing: 0;
   text-transform: uppercase;
   overflow-x: hidden;
@@ -32,14 +127,35 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
-  background: #050505;
+  background: var(--background);
   opacity: 0;
 }
 
 a,
 button {
   cursor: pointer;
+}
+
+/* Home → archive lightbox: suppress chrome until GSAP fades it in with the lightbox */
+body[data-defer-chrome-reveal="1"] header.fixed,
+body[data-defer-chrome-reveal="1"] .live-indicator-wrap,
+body[data-defer-chrome-reveal="1"] .theme-toggle-wrap,
+body[data-defer-chrome-reveal="1"] .scroll-hint-wrap {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: none !important;
+}
+
+body[data-theme-gate="1"] header.fixed,
+body[data-theme-gate="1"] .live-indicator-wrap,
+body[data-theme-gate="1"] .chrome-toggles-wrap,
+body[data-theme-gate="1"] .theme-toggle-wrap,
+body[data-theme-gate="1"] .scroll-hint-wrap {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: none !important;
 }
 
 body,
@@ -58,12 +174,21 @@ button,
 input,
 textarea,
 select,
-label {
+label,
+time,
+small,
+strong,
+em,
+code,
+pre,
+td,
+th {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 0.9em;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: var(--site-font-weight);
   letter-spacing: 0;
   text-transform: uppercase;
+  color: var(--foreground);
 }
 
 button {
@@ -75,8 +200,227 @@ button {
   box-sizing: border-box;
 }
 
+.siteWideGrid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+@media (max-width: 767px) {
+  .site-header-grid {
+    display: flex;
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .siteWideGrid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.navMLeft {
+  padding-left: 2vw;
+}
+
+.site-chrome-text,
+.site-chrome-text *,
+.site-chrome-text .glitch-hover-target,
+.site-chrome-text .nav-split-target {
+  color: var(--site-chrome-text);
+  transition: color 0.45s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-chrome-text,
+  .site-chrome-text *,
+  .site-chrome-text .glitch-hover-target,
+  .site-chrome-text .nav-split-target {
+    transition: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover,
+  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover *,
+  .contact-link:hover,
+  .contact-link:hover *,
+  button.work-project-title:hover,
+  button.work-project-title:hover * {
+    color: var(--site-indicator-red);
+  }
+
+  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover .nav-split-target::after,
+  .contact-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+header .nav-link {
+  position: relative;
+  cursor: auto;
+  display: inline-block;
+  width: fit-content;
+  line-height: 1;
+  vertical-align: baseline;
+}
+
+header .nav-link .nav-split-target {
+  position: relative;
+}
+
+a.contact-link,
+button.contact-link,
+.contact-link {
+  position: relative;
+  cursor: pointer;
+}
+
+.contact-link,
+.contact-link * {
+  cursor: pointer;
+  transition: color 0.45s ease;
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .contact-link:hover,
+  .contact-link:hover * {
+    opacity: 1;
+  }
+}
+
+.theme-toggle,
+.language-toggle {
+  cursor: auto;
+}
+
+header .nav-link .nav-split-target::after,
+.contact-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--site-indicator-red);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.45s cubic-bezier(0.25, 0.1, 0.25, 1);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-link,
+  .contact-link * {
+    transition: none;
+  }
+
+  header .nav-link .nav-split-target::after,
+  .contact-link::after {
+    transition: none;
+  }
+}
+
+.siteChromeInsetRight {
+  padding-right: max(2vw, env(safe-area-inset-right));
+}
+
+.info-bio-grid {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 949px) {
+  .info-bio-grid {
+    margin-top: 5vh;
+  }
+}
+
+@media (min-width: 950px) {
+  .info-bio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.info-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  row-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .info-footer-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 0;
+    align-items: start;
+  }
+}
+
+/* Preloader wordmark — desktop: full viewport height; mobile: rotated 90°, full viewport width */
+.preloader-logo-stage {
+  --preloader-ratio: calc(2560 / 1053);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+[data-preloader-root] .preloader-wordmark-letter,
+[data-preloader-root] .preloader-wordmark-letter path {
+  color: var(--foreground);
+  transition: none !important;
+}
+
+[data-preloader-root] [data-preloader-counter] {
+  visibility: hidden;
+}
+
+[data-preloader-root][data-preloader-active="1"] [data-preloader-counter] {
+  visibility: visible;
+}
+
+@media (max-width: 767px) {
+  .preloader-logo-stage {
+    /* Pre-rotation height becomes visual width after rotate(90deg) */
+    height: 100vw;
+    width: calc(100vw * var(--preloader-ratio));
+    max-width: none;
+    max-height: none;
+    transform: translateZ(0) rotate(90deg);
+    transform-origin: center center;
+  }
+}
+
+@media (min-width: 768px) {
+  .preloader-logo-stage {
+    height: 100vh;
+    width: calc(100vh * var(--preloader-ratio));
+    max-width: none;
+    max-height: none;
+  }
+}
+
+.preloader-logo-stage svg {
+  overflow: visible;
+}
+
+/* Nav / link labels — luxury hover handled in SiteHeader (soft opacity fade) */
+.nav-hover-char {
+  vertical-align: middle;
+}
+
+.altPadding {
+  padding: 6vh 0 0;
+}
+
 .home-gallery-scroller {
-  width: 100vw;
+  /* 100% of the main column — avoids 100vw/100dvw exceeding the layout viewport
+     when scrollbars exist (wide desktop), which broke scroll metrics + intro timing. */
+  width: 100%;
+  /* Firefox: avoid scroll anchoring nudging horizontal scroll as media/layout settles (SPA remount). */
+  overflow-anchor: none;
   height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
@@ -84,44 +428,50 @@ button {
   touch-action: pan-x pinch-zoom;
   overscroll-behavior: none;
   opacity: 1;
-  transition: opacity 0.8s ease;
+  transition: opacity 0.35s ease;
   scrollbar-width: none;
+  /* Promote to own compositing layer so the browser can scroll on the GPU thread */
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
 }
 
 .home-gallery-card {
-  width: calc(100vw / 3);
-  min-width: calc(100vw / 3);
-  flex: 0 0 calc(100vw / 3);
+  width: var(--home-gallery-card-width, calc(100vw / 3));
+  min-width: var(--home-gallery-card-width, calc(100vw / 3));
+  flex: 0 0 var(--home-gallery-card-width, calc(100vw / 3));
   height: 100vh;
-  transform-origin: center center;
-  will-change: auto;
+  overflow: hidden;
+  isolation: isolate;
 }
 
+/* Fixed frame — only the inner layer scales so black never shows at the edges */
 .home-gallery-media {
+  position: relative;
   height: 100%;
   width: 100%;
   overflow: hidden;
+}
+
+.home-gallery-scale-inner {
+  position: absolute;
+  inset: 0;
+  transform: scale3d(1, 1, 1);
+  transform-origin: center center;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .home-gallery-image {
   height: 100%;
   width: 100%;
   transform-origin: center center;
-  will-change: transform;
-  transition: transform 0.22s ease-out;
-  backface-visibility: hidden;
-  contain: paint;
 }
 
 @supports (width: 100dvw) {
-  .home-gallery-scroller {
-    width: 100dvw;
-  }
-
   .home-gallery-card {
-    width: calc(100dvw / 3);
-    min-width: calc(100dvw / 3);
-    flex-basis: calc(100dvw / 3);
+    width: var(--home-gallery-card-width, calc(100dvw / 3));
+    min-width: var(--home-gallery-card-width, calc(100dvw / 3));
+    flex-basis: var(--home-gallery-card-width, calc(100dvw / 3));
   }
 }
 
@@ -132,9 +482,6 @@ button {
     flex-basis: 100vw;
   }
 
-  .home-gallery-image {
-    transition-duration: 0.18s;
-  }
 }
 
 @supports (width: 100dvw) {
@@ -159,58 +506,196 @@ button {
   opacity: 0;
 }
 
-.archive-page-scroller,
-.archive-lightbox-scroller,
-.archive-thumb-rail {
-  scrollbar-width: none;
+/* Cards stay inert while idle; scroller keeps receiving scroll/drag to wake the track. */
+.home-gallery-is-idle .home-gallery-card {
+  pointer-events: none;
+  cursor: default;
 }
 
-.archive-page-scroller::-webkit-scrollbar,
-.archive-lightbox-scroller::-webkit-scrollbar,
-.archive-thumb-rail::-webkit-scrollbar {
+.home-gallery-scroller:not(.home-gallery-interactive) .home-gallery-card {
+  pointer-events: none;
+  cursor: default;
+}
+
+.home-gallery-scroller.home-gallery-leaving-complete {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: none !important;
+}
+
+.archive-page-scroller {
+  scrollbar-width: none;
+  scroll-behavior: auto;
+  overflow-anchor: none;
+  touch-action: pan-y;
+}
+
+.archive-page-scroller::-webkit-scrollbar {
   display: none;
 }
 
-.archive-page-scroller,
-.archive-lightbox-scroller {
+.archive-page-scroller {
   overscroll-behavior: none;
+}
+
+/* Promote scroll layer; reduces main-thread scroll jank in Chromium */
+.archive-page-scroller {
+  transform: translateZ(0);
+}
+
+/* Landing animation: no user scroll (JS also clamps scrollTop + blocks wheel/touch) */
+.archive-page-scroller[data-archive-landing="1"] {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+@supports (content-visibility: auto) {
+  .archive-grid-card {
+    content-visibility: auto;
+    contain-intrinsic-size: calc(
+      (100dvh - (var(--archive-visible-rows) - 1) * var(--archive-grid-gap)) /
+        var(--archive-visible-rows)
+    );
+  }
+}
+
+@media (max-width: 767px) {
+  .archive-grid-card {
+    content-visibility: visible;
+  }
+}
+
+/* During GSAP landing: `content-visibility: auto` fights clip-path on many tiles in Chrome. */
+.archive-grid[data-archive-intro="1"] .archive-grid-card {
+  content-visibility: visible;
+  transition: none;
+}
+
+.archive-grid[data-archive-intro="1"] .archive-grid-image {
+  will-change: clip-path;
 }
 
 .archive-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--archive-grid-gap);
+}
+
+.archive-grid[data-archive-wave="1"] {
+  will-change: transform;
 }
 
 .archive-grid-card {
   position: relative;
-  height: calc(100vh / 6);
+  display: block;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
   transition: opacity 0.35s ease;
-  content-visibility: auto;
-  contain-intrinsic-size: calc(100vh / 6);
-  contain: layout paint style;
+  contain: layout style;
+}
+
+.archive-grid[data-archive-wave="1"] .archive-grid-card {
+  will-change: transform;
+}
+
+.archive-grid-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  contain: paint;
+}
+
+/* Very short transition: snappy hover tracking, still avoids hard flash */
+@media (hover: hover) and (pointer: fine) {
+  .archive-grid-root[data-archive-dim="1"] .archive-grid-card {
+    transition: opacity 0.05s ease;
+  }
+}
+
+/* Archive: pointer-driven dimming (virtualized cells get correct opacity without :hover flash) */
+@media (hover: hover) and (pointer: fine) {
+  .archive-grid-root[data-archive-dim="1"] .archive-grid button.archive-grid-card {
+    opacity: 0.16;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .archive-grid-root[data-archive-dim="1"] .archive-grid button.archive-grid-card[data-archive-bright="1"],
+  .archive-grid-root[data-archive-dim="1"] .archive-grid button.archive-grid-card:focus-visible {
+    opacity: 1;
+  }
+}
+
+/* Keyboard when pointer is not holding dim mode — only after landing + numbers are done */
+.archive-grid-root[data-archive-interactive="1"]:not([data-archive-dim="1"]):focus-within .archive-grid-card {
+  opacity: 0.16;
+}
+
+.archive-grid-root[data-archive-interactive="1"]:not([data-archive-dim="1"]):focus-within .archive-grid-card:focus-visible {
+  opacity: 1;
 }
 
 .archive-grid-card-dimmed {
   opacity: 0.16;
 }
 
-.archive-thumb {
-  height: 72px;
-  width: 56px;
-  flex: 0 0 auto;
-  overflow: hidden;
-  opacity: 0.3;
-  transition: opacity 0.25s ease;
+.archive-lightbox-filename,
+.archive-lightbox-filename-inner,
+.archive-lightbox-filename-settled,
+.archive-lightbox-filename span {
+  color: var(--color-white);
 }
 
-.archive-thumb.active {
-  opacity: 1;
+.archive-lightbox-filename {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 55;
+  max-width: min(88vw, 48rem);
+  padding-inline: max(0px, env(safe-area-inset-left)) max(0px, env(safe-area-inset-right));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  text-align: center;
+  font-weight: var(--site-font-weight);
+  line-height: 1.15;
+  letter-spacing: 0;
+  background: transparent;
+  mix-blend-mode: difference;
+}
+
+.archive-lightbox-filename-inner {
+  display: inline-block;
+  min-height: 1.15em;
+  line-height: 1.15;
+  vertical-align: middle;
+  letter-spacing: 0;
+}
+
+.archive-lightbox-filename-settled {
+  display: block;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+@media (max-width: 767px) {
+  html:not(.dark) .archive-lightbox-prev,
+  html:not(.dark) .archive-lightbox-next {
+    color: var(--color-white);
+  }
+
+  .archive-lightbox-close {
+    color: var(--color-white);
+    mix-blend-mode: difference;
+  }
 }
 
 .preloader-char,
-.nav-char {
+.nav-char,
+.nav-split-word {
+  display: inline-block;
   line-height: 1;
 }
 
@@ -218,13 +703,313 @@ button {
   .archive-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
+}
 
-  .archive-grid-card {
-    height: calc(100vh / 9);
-    contain-intrinsic-size: calc(100vh / 9);
+/* Images inside grid cells are not interactive — let pointer events fall
+   through to the parent button, and skip them in hit-testing. */
+.archive-grid-card img {
+  pointer-events: none;
+}
+
+/* No cell interaction / hover-dim until landing intro completes (`data-archive-interactive` on root) */
+.archive-grid-root:not([data-archive-interactive="1"]) .archive-grid button.archive-grid-card {
+  pointer-events: none;
+}
+
+.archive-grid-root:not([data-archive-interactive="1"]) .archive-grid .archive-grid-image {
+  pointer-events: none;
+}
+
+/* Info page paragraph fade-in */
+@keyframes info-para-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.info-para-fade {
+  opacity: 0;
+  animation: info-para-in 0.55s ease forwards;
+}
+
+.work-title-reveal {
+  clip-path: inset(0 0 100% 0);
+  animation: work-title-reveal 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes work-title-reveal {
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .work-title-reveal {
+    animation: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.work-project-list.work-directory-reveal-pending .work-category-block,
+.work-project-list.work-directory-reveal-pending .work-category-label-row,
+.work-project-list.work-directory-reveal-pending
+  .work-project-row:not(.work-project-row-pinned) {
+  clip-path: inset(0% 0% 100% 0%);
+  overflow: hidden;
+}
+
+.work-project-list {
+  scrollbar-width: none;
+}
+
+.work-project-list::-webkit-scrollbar {
+  display: none;
+}
+
+.work-gallery-scroller {
+  scrollbar-width: none;
+}
+
+.work-gallery-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.work-project-page {
+  width: 100%;
+}
+
+.work-project-gallery {
+  width: 100%;
+  gap: 0;
+}
+
+.work-project-gallery img {
+  display: block;
+  width: 100%;
+}
+
+.work-category-label {
+  opacity: 0.72;
+}
+
+.work-project-title {
+  margin: 0;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+.work-nav-loading {
+  font-size: 1rem;
+  opacity: 0;
+}
+
+.work-project-transition-overlay {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.work-next-project-label {
+  display: inline-block;
+}
+
+/* Fixed label, hidden until the pull-up gesture fades it in (set via JS). */
+.work-next-project-zone {
+  opacity: 0;
+}
+
+[data-page-content][data-work-pull-ready="1"] {
+  overscroll-behavior-y: none;
+  touch-action: pan-y;
+}
+
+[data-page-content][data-work-pull-engaged="1"] {
+  touch-action: none;
+}
+
+/* Promote the pulled content to the GPU only while the pull is active — keeps
+   the translateY smooth without a permanent compositing-layer cost. (The fixed
+   label only fades, and manages its own will-change in JS.) */
+[data-page-content][data-work-pull-engaged="1"] .work-project-scroll-inner {
+  will-change: transform;
+}
+
+.work-next-project-label-base {
+  opacity: 0.28;
+}
+
+.work-next-project-label-fill {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+}
+
+html:not(.dark)
+  :is(html, body)[data-work-chrome="1"]
+  .work-chrome-difference
+  .work-next-project-label,
+html:not(.dark)
+  :is(html, body)[data-work-chrome="1"]
+  .work-chrome-difference
+  .work-next-project-label-fill {
+  color: var(--color-white);
+}
+
+/* Work section: difference-blend labels over imagery (light mode only) */
+html:not(.dark) :is(html, body)[data-work-chrome="1"] {
+  --site-chrome-text: var(--color-white);
+  background-color: transparent;
+}
+
+html:not(.dark) :is(html, body)[data-work-chrome="1"] .work-chrome-difference {
+  mix-blend-mode: difference;
+  color: var(--color-white);
+}
+
+html:not(.dark)
+  :is(html, body)[data-work-chrome="1"]
+  .work-chrome-difference
+  :is(.site-chrome-text, .site-chrome-text *) {
+  color: var(--color-white);
+}
+
 ::selection {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--selection-bg);
+  color: var(--foreground);
+}
+
+/* Pause beam when bar is faded out (other routes) to save work */
+.scroll-hint-wrap:not([data-scroll-hint-active]) .scroll-hint-beam {
+  animation-play-state: paused;
+}
+
+/* Label aligns with first nav link via JS (`scrollHintWrapRef` in SiteHeader) */
+.scroll-hint-label {
+  font-size: 1rem;
+}
+
+/* Bottom-left scroll / swipe hint */
+.scroll-hint-track {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  overflow: hidden;
+  background: var(--site-chrome-scroll-track);
+  border-radius: 1px;
+  transition: background-color 0.45s ease;
+}
+
+.scroll-hint-beam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 38%;
+  background: var(--site-chrome-scroll-beam);
+  border-radius: 1px;
+  will-change: left, opacity;
+  transition: background-color 0.45s ease;
+  /* Piecewise easing below: ease-in → coast → ease-out (scroll-like) */
+  animation: scroll-hint-sweep 3s infinite;
+}
+
+@keyframes scroll-hint-sweep {
+  0% {
+    left: -38%;
+    opacity: 0.72;
+    animation-timing-function: cubic-bezier(0,.91,1,.06);
+  }
+  18% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0,.82,1,.12);
+  }
+  78% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0,.91,1,.06);
+  }
+  100% {
+    left: 100%;
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint-beam {
+    animation: none;
+    left: 31%;
+    width: 38%;
+    opacity: 1;
+  }
+}
+
+/* Top-right LIVE indicator */
+.live-indicator-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #e02020;
+  box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
+  animation: live-dot-beep 1.15s ease-in-out infinite;
+}
+
+@keyframes live-dot-beep {
+  0%,
+  65% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
+  }
+  72% {
+    opacity: 0.28;
+    transform: scale(0.88);
+    box-shadow: 0 0 4px rgba(224, 32, 32, 0.35);
+  }
+  80%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-indicator-dot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Mode toggle — dot slides in from left on hover (clipped slot) */
+.theme-toggle-dot-slot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.theme-toggle-dot-slide {
+  display: block;
+  width: 8px;
+  height: 8px;
+  will-change: transform;
+}
+
+.theme-toggle-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.theme-gate-option {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.theme-gate-suffix {
+  will-change: transform;
 }

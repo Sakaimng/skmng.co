@@ -1,0 +1,31 @@
+{
+  "npm.packageManager": "npm",
+  "npm.scriptExplorerAction": "run",
+  "css.customData": ["${workspaceFolder}/.vscode/tailwind-css-v4-at-rules.json"],
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  "git.ignoreLimitWarning": true,
+  "git.openRepositoryInParentFolders": "never",
+  "git.autoRepositoryDetection": "openEditors",
+
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/public/assets/**": true,
+    "**/raw-assets/**": true,
+    "**/*.tsbuildinfo": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/public/assets": true,
+    "**/raw-assets": true,
+    "**/package-lock.json": true,
+    "**/*.tsbuildinfo": true
+  },
+  "files.exclude": {
+    "**/.next": true,
+    "**/*.tsbuildinfo": true
+  }
+}
