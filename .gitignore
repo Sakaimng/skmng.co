@@ -40,6 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+<<<<<<< HEAD
 # local gallery binaries (served from public/assets at deploy; keep out of git)
 /public/assets/
 /src/assets/
@@ -47,3 +48,7 @@ next-env.d.ts
 
 # editor / agent scratch
 .cursor
+=======
+# Nested local clone (separate git worktree); app lives at repo root
+/SKMNG.CO
+>>>>>>> 38582d7b5c407bfe4ca14ff2e3f0c5c33038982f
