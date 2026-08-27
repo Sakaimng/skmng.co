@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { SiteHeader } from "@/components/SiteHeader";
+import { HOME_NAV_LANDING_DONE_EVENT } from "@/lib/homeBookOverlay";
 
 const SITE_BOOT_STORAGE_KEY = "skmng-site-booted";
 const SITE_BOOT_EVENT = "skmng:site-booted";
@@ -27,6 +28,7 @@ export function GlobalSiteHeader() {
 
   const handleLandingRevealDone = useCallback(() => {
     setPlayLandingReveal(false);
+    window.dispatchEvent(new Event(HOME_NAV_LANDING_DONE_EVENT));
   }, []);
 
   useEffect(() => {

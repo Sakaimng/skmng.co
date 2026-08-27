@@ -54,17 +54,17 @@ export function InfoContactContent() {
                 delay={INFO_FOOTER_ANIM_DELAY_S}
                 className="mt-[9px] leading-none text-foreground md:ml-auto [&_a]:leading-none [&_button]:leading-none"
               >
-                <div className="inline-grid grid-cols-[auto_auto] items-baseline gap-x-[0.35em] gap-y-0.5 leading-none">
+                <div className="inline-grid w-full max-w-full grid-cols-[auto_1fr] items-baseline gap-x-[0.35em] gap-y-0.5 leading-none md:w-fit md:grid-cols-[auto_auto]">
                   <span className="justify-self-start text-foreground md:justify-self-end">
                     {messages.info.emailLabel}
                   </span>
-                  <div className="flex min-w-0 justify-start text-left md:justify-end md:text-right">
+                  <div className="flex min-w-0 justify-end text-right">
                     <ContactEmailCopy email={CONTACT_EMAIL} />
                   </div>
                   <span className="justify-self-start text-foreground md:justify-self-end">
                     {messages.info.instagramLabel}
                   </span>
-                  <div className="flex min-w-0 justify-start text-left md:justify-end md:text-right">
+                  <div className="flex min-w-0 justify-end text-right">
                     <ContactInstagramLink href={INSTAGRAM_HREF} handle={INSTAGRAM_HANDLE} />
                   </div>
                 </div>

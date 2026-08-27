@@ -943,7 +943,7 @@ export const WorkProjectScroll = memo(function WorkProjectScroll({
           className="work-next-project-zone pointer-events-none fixed inset-x-0 bottom-0 z-20 flex min-h-[min(28dvh,10rem)] items-center justify-center pb-[max(2.5%,env(safe-area-inset-bottom))]"
         >
           <div className="work-chrome-difference">
-            <p className="work-next-project-label site-chrome-text relative m-0 uppercase leading-none tracking-[0.14em]">
+            <p className="work-next-project-label relative m-0 leading-none tracking-[0.14em]">
               <span className="work-next-project-label-base" aria-hidden>
                 next project
               </span>

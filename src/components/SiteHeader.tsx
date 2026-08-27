@@ -68,8 +68,6 @@ function resetNavItemText(els: HTMLElement[]) {
 
 // ─── Scramble ────────────────────────────────────────────────────────────────
 
-/** Same red as LIVE dot + preloader 100% (`globals.css` / `PRELOADER_COMPLETE_RED`) */
-const NAV_SCRAMBLE_RED = "#e02020";
 
 function getForegroundColor(): string {
   if (typeof document === "undefined") return "#f6f6f6";
@@ -101,7 +99,7 @@ function runTypewriterScrambleReveal(
   el: HTMLElement,
   text: string,
   options?: {
-    /** When false, keeps `NAV_SCRAMBLE_RED` after typing so the label can fade to foreground later (e.g. after the hero logo is gone). Default true. */
+    /** When false, skips the fade-to-foreground after typing (the label keeps its current color). Default true. */
     fadeToForegroundWhenDone?: boolean;
     onDone?: () => void;
   },
@@ -135,12 +133,10 @@ function runTypewriterScrambleReveal(
   const SCRAMBLE_TICKS_PER_CHAR = 5;
 
   el.textContent = "";
-  el.style.color = NAV_SCRAMBLE_RED;
 
   const finish = () => {
     if (cancelled) return;
     el.textContent = text;
-    el.style.color = NAV_SCRAMBLE_RED;
     if (fadeToForegroundWhenDone) {
       fadeNavLabelColorOut(el);
     }
@@ -227,8 +223,6 @@ export function SiteHeader({
 
   const isNavInteractive =
     !isPreloading && (currentPath !== "/" || homeGalleryIntroDone);
-
-  const workChromeDifference = /^\/work(\/|$)/.test(currentPath);
 
   const pointerNavigationLockRef = useRef<string | null>(null);
 
@@ -726,8 +720,6 @@ export function SiteHeader({
     if (skmngTarget) {
       skmngTarget.replaceChildren(document.createTextNode("SKMNG"));
       gsap.set(skmngTarget, { autoAlpha: 1 });
-      skmngTarget.style.color = NAV_SCRAMBLE_RED;
-      fadeNavLabelColorOut(skmngTarget);
     }
 
     if (!navTargets.length) return;
@@ -780,14 +772,14 @@ export function SiteHeader({
 
   return (
     <>
-      {/* Language — fixed top-left (all viewports) */}
+      {/* Language — fixed top-left (desktop only) */}
       <div
         ref={chromeTogglesWrapRef}
-        className={`chrome-toggles-wrap fixed top-[max(2.5%,env(safe-area-inset-top))] left-0 z-40 pointer-events-auto select-none transition-opacity duration-300 pl-[max(2vw,env(safe-area-inset-left))] md:pl-0 ${
-          workChromeDifference ? "work-chrome-difference" : ""
-        } ${isPreloading ? "pointer-events-none opacity-0" : "opacity-100"}`}
+        className={`chrome-toggles-wrap fixed top-[max(2.5%,env(safe-area-inset-top))] left-0 z-40 hidden flex-col gap-2 pointer-events-auto select-none transition-opacity duration-300 md:flex ${
+          isPreloading ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
       >
-        <LanguageToggle />
+        <LanguageToggle hidden={isPreloading} />
       </div>
 
       {/* LIVE — top right */}
@@ -797,9 +789,7 @@ export function SiteHeader({
         <span className="live-indicator flex items-center gap-2" aria-label={messages.a11y.live}>
           <span className="live-indicator-dot" aria-hidden />
           <span
-            className={`site-chrome-text font-semibold uppercase leading-none tracking-[0.14em]${
-              workChromeDifference ? " work-chrome-difference" : ""
-            }`}
+            className={`site-chrome-text font-semibold leading-none tracking-[0.14em]`}
           >
             {messages.chrome.online}
           </span>
@@ -810,11 +800,11 @@ export function SiteHeader({
       <div
         ref={scrollHintWrapRef}
         data-scroll-hint-active={currentPath === "/" ? "1" : undefined}
-        className="scroll-hint-wrap fixed bottom-[max(2.5%,env(safe-area-inset-bottom))] left-0 z-[60] flex flex-col gap-1.5 pointer-events-none max-md:left-[max(2vw,env(safe-area-inset-left))] max-md:right-auto max-md:w-full max-md:max-w-[calc(100vw-4vw)] md:right-[max(2vw,env(safe-area-inset-right))]"
+        className={`scroll-hint-wrap fixed bottom-[max(2.5%,env(safe-area-inset-bottom))] left-0 z-[60] flex flex-col gap-1.5 pointer-events-none max-md:left-[max(2vw,env(safe-area-inset-left))] max-md:right-auto max-md:w-full max-md:max-w-[calc(100vw-4vw)] md:right-[max(2vw,env(safe-area-inset-right))]`}
         aria-hidden
       >
-        <span className="scroll-hint-label site-chrome-text block w-fit font-semibold uppercase leading-none tracking-[0.14em]">
-          SWIPE/SCROLL
+        <span className="scroll-hint-label site-chrome-text block w-fit font-semibold leading-none tracking-[0.14em]">
+          Swipe/scroll
         </span>
         <div className="scroll-hint-track">
           <div className="scroll-hint-beam" />
@@ -826,12 +816,10 @@ export function SiteHeader({
       <header
         ref={headerRef}
         data-nav-interactive={isNavInteractive ? "1" : "0"}
-        className={`fixed inset-0 pointer-events-none ${
-          workChromeDifference ? "work-chrome-difference" : ""
-        } ${isPreloading ? "z-[130]" : "z-50"}`}
+        className={`fixed inset-0 pointer-events-none ${isPreloading ? "z-[130]" : "z-50"}`}
       >
         <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2">
-          <div className="siteWideGrid site-header-grid items-center max-md:flex max-md:flex-wrap max-md:items-center max-md:justify-start max-md:gap-4 max-md:pl-[max(2vw,env(safe-area-inset-left))] max-md:pr-[max(2vw,env(safe-area-inset-right))]">
+          <div className="siteWideGrid site-header-grid items-center max-md:flex max-md:flex-nowrap max-md:items-center max-md:justify-start max-md:gap-4 max-md:pl-[max(2vw,env(safe-area-inset-left))] max-md:pr-[max(2vw,env(safe-area-inset-right))]">
             <button
               type="button"
               onPointerDown={handleNavPointerDown("/")}
@@ -843,7 +831,7 @@ export function SiteHeader({
               aria-label="Home"
               data-nav-href="/"
             >
-              <span className="nav-split-target inline-block overflow-hidden uppercase leading-none">
+              <span className="nav-brand nav-split-target inline-block overflow-hidden leading-none">
                 SKMNG
               </span>
             </button>
@@ -851,19 +839,20 @@ export function SiteHeader({
             {showWorkLoadingLabel ? (
               <span
                 ref={workLoadingRef}
-                className="work-nav-loading site-chrome-text pointer-events-none uppercase leading-none tracking-[0.14em] max-md:hidden md:col-start-2 md:justify-self-center md:self-center"
+                className="work-nav-loading site-chrome-text pointer-events-none leading-none tracking-[0.14em] max-md:hidden md:col-start-2 md:justify-self-center md:self-center"
                 aria-live="polite"
               >
-                LOADING
+                Loading
               </span>
             ) : null}
 
             <nav
               ref={navBlurRef}
-              className={`site-chrome-text flex w-max shrink-0 items-center gap-4 md:gap-3 max-md:order-2 md:col-start-3 md:justify-self-start ${
+              className={`site-chrome-text flex w-max min-w-0 shrink items-center gap-4 md:gap-3 max-md:order-2 max-md:w-full max-md:flex-1 max-md:justify-between md:col-start-3 md:justify-self-start ${
                 isNavInteractive ? "pointer-events-auto" : "pointer-events-none"
               }`}
             >
+              <div className="flex min-w-0 items-center gap-4 md:gap-3">
               {navItems.map((item) => (
                   <button
                     key={item.href}
@@ -875,11 +864,13 @@ export function SiteHeader({
                     data-nav-href={item.href}
                     className="nav-link site-chrome-text w-fit shrink-0 cursor-auto whitespace-nowrap leading-none transition"
                   >
-                    <span className="nav-split-target inline-block overflow-hidden uppercase leading-none">
+                    <span className="nav-split-target inline-block overflow-hidden leading-none">
                       {item.label}
                     </span>
                   </button>
               ))}
+              </div>
+              <LanguageToggle className="shrink-0 md:hidden" hidden={isPreloading} />
             </nav>
           </div>
         </div>

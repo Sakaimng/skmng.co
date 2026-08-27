@@ -860,7 +860,7 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
             }}
             className="work-category-label-row w-full overflow-hidden"
           >
-            <p className="work-category-label work-chrome-difference site-chrome-text m-0 uppercase leading-none tracking-[0.14em]">
+            <p className="work-category-label work-chrome-difference m-0 leading-none tracking-[0.14em]">
               <span
                 className={`inline-block leading-none${
                   skipDirectoryLanding ? "" : " work-title-reveal"

@@ -5,7 +5,9 @@ export const DEFER_CHROME_REVEAL_KEY = "skmng-defer-chrome-reveal";
 export function getNavChromeTargets(): HTMLElement[] {
   if (typeof document === "undefined") return [];
   return Array.from(
-    document.querySelectorAll<HTMLElement>("header.fixed, .live-indicator-wrap"),
+    document.querySelectorAll<HTMLElement>(
+      "header.fixed, .live-indicator-wrap, .chrome-toggles-wrap",
+    ),
   );
 }
 

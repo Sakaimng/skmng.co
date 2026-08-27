@@ -103,7 +103,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="min-h-full bg-background font-sans text-foreground"
+        className="min-h-full bg-background font-sans text-foreground theme-dark"
         suppressHydrationWarning
       >
         <Script id="theme-init" strategy="beforeInteractive">
