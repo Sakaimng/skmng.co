@@ -296,7 +296,10 @@ export function PageTransitionProvider({
         return;
       }
 
-      if (currentPathRef.current === "/info-contact" && href !== "/info-contact") {
+      if (
+        (currentPathRef.current === "/info-contact" && href !== "/info-contact") ||
+        (currentPathRef.current.startsWith("/journal") && !href.startsWith("/journal"))
+      ) {
         window.dispatchEvent(
           new CustomEvent<LeaveOutroDetail>(INFO_LEAVE_OUTRO_EVENT, {
             detail: {

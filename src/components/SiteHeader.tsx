@@ -33,6 +33,7 @@ gsap.registerPlugin(SplitText);
 const navItems = [
   { href: "/work", label: "Work" },
   { href: "/archive", label: "Archive" },
+  { href: "/journal", label: "Journal" },
   { href: "/info-contact", label: "Info" },
 ] as const;
 
@@ -848,11 +849,11 @@ export function SiteHeader({
 
             <nav
               ref={navBlurRef}
-              className={`site-chrome-text flex w-max min-w-0 shrink items-center gap-4 md:gap-3 max-md:order-2 max-md:w-full max-md:flex-1 max-md:justify-between md:col-start-3 md:justify-self-start ${
+              className={`site-chrome-text flex w-max min-w-0 shrink items-center gap-3 max-md:order-2 max-md:w-full max-md:flex-1 max-md:justify-between md:col-start-3 md:justify-self-start ${
                 isNavInteractive ? "pointer-events-auto" : "pointer-events-none"
               }`}
             >
-              <div className="flex min-w-0 items-center gap-4 md:gap-3">
+              <div className="flex min-w-0 items-center gap-3">
               {navItems.map((item) => (
                   <button
                     key={item.href}

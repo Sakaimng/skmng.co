@@ -25,11 +25,19 @@ export const messages = {
       copyright: "© 2026 SKMNG / All rights reserved",
       copied: "Copied",
     },
+    journal: {
+      close: "CLOSE",
+      older: "OLDER",
+      newer: "NEWER",
+    },
     a11y: {
       switchToJapanese: "Switch to Japanese",
       switchToEnglish: "Switch to English",
       copyEmail: "Copy email address",
       live: "Live",
+      closeJournal: "Close journal entry",
+      olderJournal: "Older journal entry",
+      newerJournal: "Newer journal entry",
     },
   },
   ja: {
@@ -56,11 +64,19 @@ export const messages = {
       copyright: "© 2026 SKMNG / ALL RIGHTS RESERVED",
       copied: "コピーしました",
     },
+    journal: {
+      close: "閉じる",
+      older: "古い",
+      newer: "新しい",
+    },
     a11y: {
       switchToJapanese: "日本語に切り替え",
       switchToEnglish: "英語に切り替え",
       copyEmail: "メールアドレスをコピー",
       live: "オンライン",
+      closeJournal: "ジャーナルを閉じる",
+      olderJournal: "過去の記事",
+      newerJournal: "新しい記事",
     },
   },
 } as const satisfies Record<Locale, unknown>;
