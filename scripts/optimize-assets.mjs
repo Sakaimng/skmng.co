@@ -55,7 +55,14 @@ async function main() {
   for await (const file of walk(PUBLIC_ASSETS)) {
     if (!isJpg(file)) continue;
     const stat = await fs.stat(file);
-    if (stat.size < THRESHOLD_BYTES) continue;
+    const inputBuf = await fs.readFile(file);
+    const meta = await sharp(inputBuf, { failOn: "none" }).metadata();
+    const oversize = stat.size >= THRESHOLD_BYTES;
+    // 4:4:4 / baseline Lightroom JPEGs can fail to paint in Safari and during
+    // first-load decode; re-encode them to the same 4:2:0 progressive profile.
+    const unsafeJpeg =
+      meta.chromaSubsampling === "4:4:4" || meta.isProgressive === false;
+    if (!oversize && !unsafeJpeg) continue;
 
     const rel = path.relative(PUBLIC_ASSETS, file);
     const rawDest = path.join(RAW_ASSETS, rel);
@@ -69,9 +76,7 @@ async function main() {
       await fs.copyFile(file, rawDest);
     }
 
-    const inputBuf = await fs.readFile(file);
     const image = sharp(inputBuf, { failOn: "none" }).rotate(); // honour EXIF orientation
-    const meta = await image.metadata();
     const targetWidth = meta.width && meta.width > MAX_WIDTH ? MAX_WIDTH : meta.width;
 
     const outBuf = await image
