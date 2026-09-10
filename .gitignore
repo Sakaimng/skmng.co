@@ -40,8 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local gallery binaries (served from public/assets at deploy; keep out of git)
-/public/assets/
+# Gallery binaries are committed so Git/Vercel deploys can serve /assets
+# (production GERs8Vb included these files in the upload).
 /src/assets/
 .tmp-assets-prev
 

@@ -14,6 +14,7 @@ export function getWorkCoverSrc(assetUrl: string): string {
     height: 1280,
     sizes: COVER_SIZES,
     quality: COVER_IMAGE_QUALITY,
+    unoptimized: true,
     src: assetUrl,
   });
   return typeof src === "string" ? src : assetUrl;

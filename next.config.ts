@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     root: projectRoot,
   },
   images: {
+    // Gallery JPEGs already live in `public/assets` — serve them as-is so a missing
+    // optimizer result or a cached `/_next/image` 404 cannot hide the files.
+    unoptimized: true,
     formats: ["image/webp"],
     minimumCacheTTL: 2678400, // 31 days — source photos change infrequently
     localPatterns: [{ pathname: "/assets/**" }],
@@ -34,7 +37,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
+            value: "public, max-age=86400, must-revalidate",
           },
         ],
       },

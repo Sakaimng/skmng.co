@@ -15,6 +15,7 @@ export const archiveAssetNames = [
   "L1060966.jpg",
   "L1030339.jpg",
   "L1052757.jpg",
+  "DSC02704.jpg",
   "L1010309.jpg",
   "L1030258.jpg",
   "L1011478.jpg",
