@@ -82,14 +82,7 @@ async function readProjectDir(name: string): Promise<WorkProject | null> {
 }
 
 export async function getWorkProjects(): Promise<WorkProject[]> {
-  let entries;
-  try {
-    entries = await fs.readdir(ASSETS_DIR, { withFileTypes: true });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw error;
-  }
-
+  const entries = await fs.readdir(ASSETS_DIR, { withFileTypes: true });
   const projects = await Promise.all(
     entries
       .filter(

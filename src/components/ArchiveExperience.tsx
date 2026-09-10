@@ -353,9 +353,9 @@ const ArchiveLightbox = memo(function ArchiveLightbox({
         type="button"
         onClick={requestClose}
         aria-label="Close lightbox"
-        className="archive-lightbox-close fixed right-[max(2vw,env(safe-area-inset-right))] top-[max(2.5%,env(safe-area-inset-top))] z-[60] font-semibold leading-none tracking-[0.14em] text-foreground hover:text-foreground"
+        className="archive-lightbox-close fixed right-[max(2vw,env(safe-area-inset-right))] top-[max(2.5%,env(safe-area-inset-top))] z-[60] font-semibold uppercase leading-none tracking-[0.14em] text-foreground hover:text-foreground"
       >
-        Close
+        CLOSE
       </button>
 
       {/* Same vertical band as site header (`siteWideGrid` + `items-center` at 50vh) */}
@@ -363,16 +363,16 @@ const ArchiveLightbox = memo(function ArchiveLightbox({
         <button
           type="button"
           onClick={goPrev}
-          className="archive-lightbox-prev pointer-events-auto shrink-0 font-semibold leading-none tracking-[0.14em] text-foreground hover:text-foreground"
+          className="archive-lightbox-prev pointer-events-auto shrink-0 font-semibold uppercase leading-none tracking-[0.14em] text-foreground hover:text-foreground"
         >
-          Prev
+          PREV
         </button>
         <button
           type="button"
           onClick={goNext}
-          className="archive-lightbox-next pointer-events-auto shrink-0 font-semibold leading-none tracking-[0.14em] text-foreground hover:text-foreground"
+          className="archive-lightbox-next pointer-events-auto shrink-0 font-semibold uppercase leading-none tracking-[0.14em] text-foreground hover:text-foreground"
         >
-          Next
+          NEXT
         </button>
       </div>
 

@@ -41,8 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # local gallery binaries (served from public/assets at deploy; keep out of git)
-/public/assets/*
-!/public/assets/DSC02704.jpg
+/public/assets/
 /src/assets/
 .tmp-assets-prev
 

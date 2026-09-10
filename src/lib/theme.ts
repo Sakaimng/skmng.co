@@ -1,21 +1,45 @@
+export const THEME_STORAGE_KEY = "skmng-theme";
+
+export const THEME_CHANGED_EVENT = "skmng:theme-changed";
+
 export type ThemeMode = "dark";
 
-/** Site is locked to dark mode. */
-export function readThemeMode(): ThemeMode {
+export function getStoredTheme(): ThemeMode | null {
   return "dark";
 }
 
 export function applyTheme() {
-  const root = document.documentElement;
-  root.classList.add("dark");
-  root.dataset.theme = "dark";
+  document.documentElement.classList.add("dark");
+}
 
-  const body = document.body;
-  if (body) {
-    body.classList.remove("theme-light");
-    body.classList.add("theme-dark");
+export function readThemeMode(): ThemeMode {
+  return "dark";
+}
+
+export function setTheme(_mode?: ThemeMode, options?: { transition?: boolean }) {
+  const root = document.documentElement;
+
+  if (
+    options?.transition &&
+    typeof window !== "undefined" &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    root.classList.add("theme-transition");
+    window.setTimeout(() => {
+      root.classList.remove("theme-transition");
+    }, 450);
+  }
+
+  applyTheme();
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, "dark");
+  } catch {
+    /* ignore quota / private mode */
+  }
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(THEME_CHANGED_EVENT));
   }
 }
 
-export const themeInitScript =
-  '(function(){try{var r=document.documentElement;r.classList.add("dark");r.dataset.theme="dark";var b=document.body;if(b){b.classList.remove("theme-light");b.classList.add("theme-dark");}}catch(e){document.documentElement.classList.add("dark");document.documentElement.dataset.theme="dark";}})();';
+export const themeInitScript = `(function(){try{document.documentElement.classList.add("dark");localStorage.setItem("${THEME_STORAGE_KEY}","dark");}catch(e){document.documentElement.classList.add("dark");}})();`;

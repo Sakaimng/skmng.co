@@ -144,7 +144,7 @@ export const WorkHoverBackground = forwardRef<
   }, []);
 
   return (
-    <div className="work-hover-background pointer-events-none fixed inset-0 z-0" aria-hidden>
+    <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
       <div
         ref={layerARef}
         className="absolute inset-0"

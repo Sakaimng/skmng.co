@@ -1,3 +1,4 @@
 export function lightboxDisplayName(fileName: string) {
-  return fileName.replace(/\.[^.]+$/, "");
+  const base = fileName.replace(/\.[^.]+$/, "");
+  return base.toUpperCase();
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { usePathname } from "next/navigation";
@@ -34,36 +35,9 @@ const HOME_LEAVE_STAGGER_S = 0.1;
 const SNAP_DEBOUNCE_MS = 140;
 const SNAP_ENABLE_DELAY_MS = 420;
 const MOBILE_BREAKPOINT_PX = 768;
+const GALLERY_IMAGE_QUALITY = 80;
+const GALLERY_BACKGROUND_IMAGE_QUALITY = 60;
 const CARD_TAP_MOVE_THRESHOLD_PX = 10;
-/** First N track images need every loop copy decoded so wrap scroll stays seamless. */
-const HOME_GALLERY_LOOP_BUFFER = 3;
-
-function shouldLoadGalleryImage(
-  copyIndex: number,
-  imageIndex: number,
-  leadIndex: number,
-  revealCount: number,
-  introComplete: boolean,
-) {
-  if (introComplete) return true;
-  if (imageIndex < HOME_GALLERY_LOOP_BUFFER) return true;
-  if (copyIndex !== 1) return false;
-  return (
-    imageIndex >= Math.max(0, leadIndex - 1) &&
-    imageIndex < leadIndex + revealCount + 2
-  );
-}
-
-function shouldEagerGalleryImage(
-  copyIndex: number,
-  imageIndex: number,
-  leadIndex: number,
-  revealCount: number,
-) {
-  if (imageIndex < HOME_GALLERY_LOOP_BUFFER) return true;
-  if (copyIndex !== 1) return false;
-  return imageIndex >= leadIndex && imageIndex < leadIndex + revealCount + 1;
-}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -393,13 +367,9 @@ export function HomeGallery({
       const commitIntro = () => {
         syncScrollerLayout(scroller);
 
-        const cardsPerView = getCardsPerView(scroller);
-        const leadIndex = getInitialLeadIndex(scroller);
-        const cards = Array.from({ length: cardsPerView }, (_, offset) =>
-          scroller.querySelector<HTMLElement>(
-            `.home-gallery-card[data-home-gallery-copy="1"][data-home-gallery-index="${leadIndex + offset}"]`,
-          ),
-        ).filter((card): card is HTMLElement => Boolean(card));
+        const cards = Array.from(
+          scroller.querySelectorAll<HTMLElement>("[data-gallery-card='initial']"),
+        );
         const media = cards
           .map((card) => card.querySelector<HTMLElement>(".home-gallery-media"))
           .filter((node): node is HTMLElement => Boolean(node));
@@ -407,6 +377,7 @@ export function HomeGallery({
         if (cards.length === 0 || media.length === 0) return;
 
         const cw = scroller.clientWidth;
+        const cardsPerView = getCardsPerView(scroller);
         const step = (scroller.clientWidth / cardsPerView) * imageCount;
         if (cw < 2 || !step || step < 8) return;
 
@@ -526,9 +497,16 @@ export function HomeGallery({
       }
     };
 
+    const scaleLoop = () => {
+      if (!scaleLoopActiveRef.current) return;
+      updateFocusScale();
+      scaleRafRef.current = window.requestAnimationFrame(scaleLoop);
+    };
+
     const startScaleLoop = () => {
       stopScaleLoop();
-      updateFocusScale();
+      scaleLoopActiveRef.current = true;
+      scaleLoop();
     };
 
     const exactCardWidth = () => {
@@ -899,13 +877,6 @@ export function HomeGallery({
     };
   }, [pathname, isIdle, isIntroComplete]);
 
-  useLayoutEffect(() => {
-    if (!isIntroComplete) return;
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    scroller.dispatchEvent(new Event("scroll"));
-  }, [isIntroComplete]);
-
   const isMobileViewport =
     typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT_PX;
   const initialLeadIndex = isMobileViewport ? 1 : 0;
@@ -927,25 +898,18 @@ export function HomeGallery({
             const isInitialVisible =
               isMiddleSet &&
               imageIndex >= initialLeadIndex &&
+              imageIndex < initialLeadIndex + 3;
+            const isNearInitial = isMiddleSet && imageIndex < initialLeadIndex + 5;
+            const isIntroCard =
+              isMiddleSet &&
+              imageIndex >= initialLeadIndex &&
               imageIndex < initialLeadIndex + initialRevealCount;
-            const loadImage = shouldLoadGalleryImage(
-              copyIndex,
-              imageIndex,
-              initialLeadIndex,
-              initialRevealCount,
-              isIntroComplete,
-            );
-            const eagerImage = shouldEagerGalleryImage(
-              copyIndex,
-              imageIndex,
-              initialLeadIndex,
-              initialRevealCount,
-            );
 
             return (
               <button
                 type="button"
-                key={`${copyIndex}-${imageIndex}-${image.id}`}
+                key={`${copyIndex}-${image.id}`}
+                data-gallery-card={isIntroCard ? "initial" : "default"}
                 data-home-gallery-copy={copyIndex}
                 data-home-gallery-index={imageIndex}
                 data-image-id={image.id}
@@ -962,19 +926,23 @@ export function HomeGallery({
               >
                 <div className="home-gallery-media">
                   <div className="home-gallery-scale-inner">
-                    {loadImage ? (
-                      <img
-                        src={image.url}
-                        alt=""
-                        loading={eagerImage ? "eager" : "lazy"}
-                        fetchPriority={
-                          isFirstVisible ? "high" : isInitialVisible ? "high" : "auto"
-                        }
-                        decoding="async"
-                        draggable={false}
-                        className="home-gallery-image pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
-                      />
-                    ) : null}
+                    <Image
+                      src={image.url}
+                      alt=""
+                      fill
+                      quality={
+                        isInitialVisible ? GALLERY_IMAGE_QUALITY : GALLERY_BACKGROUND_IMAGE_QUALITY
+                      }
+                      sizes="(max-width: 767px) 100vw, 33vw"
+                      preload={isFirstVisible}
+                      loading={isFirstVisible ? undefined : isNearInitial ? "eager" : "lazy"}
+                      fetchPriority={
+                        isFirstVisible ? undefined : isInitialVisible ? "high" : "low"
+                      }
+                      decoding="async"
+                      draggable={false}
+                      className="home-gallery-image pointer-events-none object-cover select-none"
+                    />
                   </div>
                 </div>
               </button>

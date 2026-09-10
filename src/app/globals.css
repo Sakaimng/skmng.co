@@ -9,7 +9,7 @@
   --scroll-track: rgba(6, 6, 6, 0.18);
   --scroll-beam: var(--color-black);
   --home-gallery-chrome: var(--color-white);
-  --blend-text: #ffffff;
+  --site-indicator-red: #e02020;
   --selection-bg: rgba(6, 6, 6, 0.14);
   --site-font-size: 0.81em;
   --site-font-weight: 600;
@@ -71,9 +71,9 @@ html:not(.dark) body[data-home-gallery-over-imagery="1"] {
   --site-chrome-scroll-track: rgba(246, 246, 246, 0.3);
 }
 
-/* Light mode: keep nav on difference white until gallery track landing finishes */
+/* Light mode: keep nav foreground until gallery track landing finishes */
 html:not(.dark) body[data-home-gallery-intro-pending="1"] {
-  --site-chrome-text: var(--blend-text);
+  --site-chrome-text: var(--foreground);
   --site-chrome-scroll-beam: var(--scroll-beam);
   --site-chrome-scroll-track: var(--scroll-track);
 }
@@ -119,6 +119,7 @@ body {
   font-size: 1rem;
   font-weight: var(--site-font-weight);
   letter-spacing: 0;
+  text-transform: uppercase;
   overflow-x: hidden;
 }
 
@@ -186,11 +187,8 @@ th {
   font-size: 1rem;
   font-weight: var(--site-font-weight);
   letter-spacing: 0;
-  color: var(--foreground);
-}
-
-.nav-brand {
   text-transform: uppercase;
+  color: var(--foreground);
 }
 
 button {
@@ -242,9 +240,17 @@ button {
 }
 
 @media (hover: hover) and (pointer: fine) {
+  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover,
+  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover *,
+  .contact-link:hover,
+  .contact-link:hover *,
+  button.work-project-title:hover,
+  button.work-project-title:hover * {
+    color: var(--site-indicator-red);
+  }
+
   header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover .nav-split-target::after,
-  .contact-link:hover::after,
-  button.work-project-title:not(:disabled):hover .nav-split-target::after {
+  .contact-link:hover::after {
     transform: scaleX(1);
     transform-origin: left center;
   }
@@ -290,15 +296,14 @@ button.contact-link,
 }
 
 header .nav-link .nav-split-target::after,
-.contact-link::after,
-button.work-project-title .nav-split-target::after {
+.contact-link::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 1px;
-  background-color: currentColor;
+  background-color: var(--site-indicator-red);
   transform: scaleX(0);
   transform-origin: right center;
   transition: transform 0.45s cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -312,8 +317,7 @@ button.work-project-title .nav-split-target::after {
   }
 
   header .nav-link .nav-split-target::after,
-  .contact-link::after,
-  button.work-project-title .nav-split-target::after {
+  .contact-link::after {
     transition: none;
   }
 }
@@ -787,20 +791,11 @@ button.work-project-title .nav-split-target::after {
   opacity: 0.72;
 }
 
-body.theme-light .work-category-label {
-  opacity: 1;
-}
-
 .work-project-title {
-  position: relative;
   margin: 0;
   font: inherit;
   font-weight: inherit;
   letter-spacing: inherit;
-}
-
-button.work-project-title .nav-split-target {
-  position: relative;
 }
 
 .work-nav-loading {
@@ -859,13 +854,21 @@ html:not(.dark)
   color: var(--color-white);
 }
 
-/* Work section: labels over imagery (light mode only) */
+/* Work section: difference-blend labels over imagery (light mode only) */
 html:not(.dark) :is(html, body)[data-work-chrome="1"] {
   --site-chrome-text: var(--color-white);
   background-color: transparent;
 }
 
 html:not(.dark) :is(html, body)[data-work-chrome="1"] .work-chrome-difference {
+  mix-blend-mode: difference;
+  color: var(--color-white);
+}
+
+html:not(.dark)
+  :is(html, body)[data-work-chrome="1"]
+  .work-chrome-difference
+  :is(.site-chrome-text, .site-chrome-text *) {
   color: var(--color-white);
 }
 
@@ -944,8 +947,8 @@ html:not(.dark) :is(html, body)[data-work-chrome="1"] .work-chrome-difference {
   height: 8px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--foreground);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--foreground) 55%, transparent);
+  background: #e02020;
+  box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
   animation: live-dot-beep 1.15s ease-in-out infinite;
 }
 
@@ -954,15 +957,18 @@ html:not(.dark) :is(html, body)[data-work-chrome="1"] .work-chrome-difference {
   65% {
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
   }
   72% {
     opacity: 0.28;
     transform: scale(0.88);
+    box-shadow: 0 0 4px rgba(224, 32, 32, 0.35);
   }
   80%,
   100% {
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
   }
 }
 
@@ -1006,92 +1012,4 @@ html:not(.dark) :is(html, body)[data-work-chrome="1"] .work-chrome-difference {
 
 .theme-gate-suffix {
   will-change: transform;
-}
-
-/* Light mode — white difference typography site-wide (body.theme-light from ThemeRoot) */
-body.theme-light {
-  --site-chrome-text: var(--blend-text);
-}
-
-body.theme-light
-  :is(
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    span,
-    label,
-    li,
-    figcaption,
-    time,
-    small,
-    strong,
-    em,
-    td,
-    th,
-    code,
-    pre,
-    .preloader-char,
-    .nav-char,
-    .nav-split-word,
-    .archive-lightbox-filename,
-    .archive-lightbox-filename span
-  ):not(.site-chrome-difference):not(.work-chrome-difference):not(
-    :is(.site-chrome-difference *, .work-chrome-difference *)
-  ) {
-  color: var(--blend-text);
-  mix-blend-mode: difference;
-}
-
-body.theme-light
-  :is(button, a):not(:has(img, picture, video, canvas, svg)):not(
-    .site-chrome-text
-  ):not(.work-project-title):not(:is(.site-chrome-difference *, .work-chrome-difference *)) {
-  color: var(--blend-text);
-  mix-blend-mode: difference;
-}
-
-body.theme-light :is(
-  .work-hover-background,
-  .work-hover-background *,
-  .live-indicator-dot,
-  .theme-toggle-dot,
-  .scroll-hint-track,
-  .scroll-hint-beam,
-  img,
-  picture,
-  video,
-  canvas,
-  svg
-) {
-  mix-blend-mode: normal;
-}
-
-/* Light mode — difference blend on chrome shells (must follow global typography) */
-body.theme-light .site-chrome-difference,
-body.theme-light .work-chrome-difference {
-  color: var(--blend-text);
-  mix-blend-mode: difference;
-}
-
-body.theme-light .site-chrome-difference *,
-body.theme-light .work-chrome-difference * {
-  color: inherit;
-  mix-blend-mode: normal;
-}
-
-/* Let work labels composite with the hover imagery behind the directory list */
-body.theme-light
-  .work-project-list:not(.work-directory-reveal-pending)
-  .work-category-block,
-body.theme-light
-  .work-project-list:not(.work-directory-reveal-pending)
-  .work-category-label-row,
-body.theme-light
-  .work-project-list:not(.work-directory-reveal-pending)
-  .work-project-row {
-  overflow: visible;
 }

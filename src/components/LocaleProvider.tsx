@@ -4,8 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
-  useSyncExternalStore,
+  useState,
 } from "react";
 
 import { getMessages, type Messages } from "@/lib/i18n/messages";
@@ -24,24 +25,20 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function subscribeLocale(onStoreChange: () => void) {
-  window.addEventListener(LOCALE_CHANGED_EVENT, onStoreChange);
-  return () => window.removeEventListener(LOCALE_CHANGED_EVENT, onStoreChange);
-}
-
-function getServerLocaleSnapshot(): Locale {
-  return "en";
-}
-
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const locale = useSyncExternalStore(
-    subscribeLocale,
-    readLocale,
-    getServerLocaleSnapshot,
+  const [locale, setLocaleState] = useState<Locale>(() =>
+    typeof window !== "undefined" ? readLocale() : "en",
   );
+
+  useEffect(() => {
+    const syncLocale = () => setLocaleState(readLocale());
+    window.addEventListener(LOCALE_CHANGED_EVENT, syncLocale);
+    return () => window.removeEventListener(LOCALE_CHANGED_EVENT, syncLocale);
+  }, []);
 
   const setLocale = useCallback((next: Locale) => {
     persistLocale(next);
+    setLocaleState(next);
   }, []);
 
   const value = useMemo(

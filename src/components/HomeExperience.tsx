@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
 import { HomeGallery } from "@/components/HomeGallery";
-import { HomeBookOverlay } from "@/components/HomeBookOverlay";
 import { PreloaderLogoWordmark } from "@/components/PreloaderLogoWordmark";
 import type { AssetImage } from "@/lib/assets";
 import {
@@ -32,6 +32,7 @@ const SITE_BOOT_EVENT = "skmng:site-booted";
 const PENDING_NAV_REVEAL_KEY = "skmng-pending-nav-reveal";
 const HOME_PRELOADER_BYPASS_QUERY = "no-preloader";
 const PRELOADER_IMAGE_WARMUP_COUNT = 3;
+const PRELOADER_IMAGE_WARMUP_QUALITY = 80;
 
 function formatPercent(value: number) {
   return `${String(value).padStart(3, "0")}%`;
@@ -275,15 +276,18 @@ function Preloader({
           aria-hidden
         >
           {preloadImages.map((image, index) => (
-            <img
-              key={image.id}
-              src={image.url}
-              alt=""
-              loading="eager"
-              fetchPriority={index === 0 ? "high" : "auto"}
-              decoding="async"
-              className="absolute inset-0 h-px w-px opacity-0"
-            />
+            <span key={image.id} className="relative block size-px">
+              <Image
+                src={image.url}
+                alt=""
+                fill
+                quality={PRELOADER_IMAGE_WARMUP_QUALITY}
+                sizes="(max-width: 767px) 100vw, 33vw"
+                loading="eager"
+                fetchPriority={index === 0 ? "high" : "auto"}
+                decoding="async"
+              />
+            </span>
           ))}
         </div>
 
@@ -305,9 +309,9 @@ function Preloader({
               <div ref={pctOverflowRef} className="overflow-hidden" data-preloader-counter>
                 <div
                   ref={pctInnerRef}
-                  className="inline-block leading-none text-foreground"
+                  className="inline-block uppercase leading-none text-foreground"
                 >
-                  <span ref={pctRef} className="inline-block leading-none">
+                  <span ref={pctRef} className="inline-block uppercase leading-none">
                     000%
                   </span>
                 </div>
@@ -343,7 +347,6 @@ export function HomeExperience({ images }: { images: AssetImage[] }) {
   // "content"   — SPA navigation back home: show content immediately
   const [bootState, setBootState] = useState(resolveInitialBootState);
   const [preloaderDone, setPreloaderDone] = useState(false);
-  const [isFullLandingSession, setIsFullLandingSession] = useState(false);
 
   // useLayoutEffect runs synchronously before the browser paints, so the user
   // never sees the blank "pending" frame. It's also committed (not discarded by
@@ -366,7 +369,6 @@ export function HomeExperience({ images }: { images: AssetImage[] }) {
 
     if (!window._skmngHomeRendered) {
       window._skmngHomeRendered = true;
-      setIsFullLandingSession(true);
       setBootState((state) => (state === "pending" ? "preloader" : state));
       return;
     }
@@ -427,7 +429,6 @@ export function HomeExperience({ images }: { images: AssetImage[] }) {
       {showContent && (
         <div data-page-content>
           <HomeGallery images={images} animateIntro />
-          {isFullLandingSession ? <HomeBookOverlay /> : null}
         </div>
       )}
     </main>

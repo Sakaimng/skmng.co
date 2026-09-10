@@ -106,7 +106,7 @@ export function LanguageToggle({
     >
       <button
         type="button"
-        className="language-toggle theme-toggle site-chrome-text pointer-events-auto inline-flex cursor-auto items-center gap-2 font-semibold leading-none tracking-[0.14em]"
+        className="language-toggle theme-toggle site-chrome-text pointer-events-auto inline-flex cursor-auto items-center gap-2 font-semibold uppercase leading-none tracking-[0.14em]"
         onClick={toggle}
         onPointerEnter={() => {
           if (!isMobileViewport()) setHovered(true);
