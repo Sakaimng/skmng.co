@@ -69,7 +69,7 @@ export function JournalArticle({ entry }: { entry: JournalEntry }) {
 
       <div className="h-full overflow-x-hidden overflow-y-auto">
         <div className="relative mx-auto w-[81vw] pt-[max(5rem,calc(2.5%+3rem))] pb-[max(5rem,calc(2.5%+3.5rem))]">
-          <article className="flex w-full min-w-0 flex-col items-start text-left text-foreground">
+          <article className="journal-entry flex w-full min-w-0 flex-col items-start text-left text-foreground">
             <div className="flex w-full min-w-0 flex-col items-start gap-5">
               {entry.paragraphs.map((paragraph, index) => (
                 <p

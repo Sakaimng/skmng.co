@@ -726,6 +726,11 @@ header .nav-link .nav-split-target::after,
   animation: info-para-in 0.55s ease forwards;
 }
 
+.journal-entry,
+.journal-entry p {
+  text-transform: none;
+}
+
 .work-title-reveal {
   clip-path: inset(0 0 100% 0);
   animation: work-title-reveal 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
