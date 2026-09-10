@@ -240,15 +240,6 @@ button {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover,
-  header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover *,
-  .contact-link:hover,
-  .contact-link:hover *,
-  button.work-project-title:hover,
-  button.work-project-title:hover * {
-    color: var(--site-indicator-red);
-  }
-
   header[data-nav-interactive="1"] .nav-link:not([aria-disabled="true"]):hover .nav-split-target::after,
   .contact-link:hover::after {
     transform: scaleX(1);
@@ -267,6 +258,10 @@ header .nav-link {
 
 header .nav-link .nav-split-target {
   position: relative;
+}
+
+header .nav-link .nav-item-label {
+  text-transform: none;
 }
 
 a.contact-link,
@@ -303,7 +298,7 @@ header .nav-link .nav-split-target::after,
   right: 0;
   bottom: 0;
   height: 1px;
-  background-color: var(--site-indicator-red);
+  background-color: currentColor;
   transform: scaleX(0);
   transform-origin: right center;
   transition: transform 0.45s cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -798,6 +793,13 @@ header .nav-link .nav-split-target::after,
   letter-spacing: inherit;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  button.work-project-title:hover,
+  button.work-project-title:hover * {
+    color: var(--site-indicator-red);
+  }
+}
+
 .work-nav-loading {
   font-size: 1rem;
   opacity: 0;
@@ -885,6 +887,7 @@ html:not(.dark)
 /* Label aligns with first nav link via JS (`scrollHintWrapRef` in SiteHeader) */
 .scroll-hint-label {
   font-size: 1rem;
+  text-transform: none;
 }
 
 /* Bottom-left scroll / swipe hint */
@@ -947,8 +950,8 @@ html:not(.dark)
   height: 8px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #e02020;
-  box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
+  background: var(--color-white);
+  box-shadow: 0 0 10px rgba(246, 246, 246, 0.7);
   animation: live-dot-beep 1.15s ease-in-out infinite;
 }
 
@@ -957,18 +960,18 @@ html:not(.dark)
   65% {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
+    box-shadow: 0 0 10px rgba(246, 246, 246, 0.7);
   }
   72% {
     opacity: 0.28;
     transform: scale(0.88);
-    box-shadow: 0 0 4px rgba(224, 32, 32, 0.35);
+    box-shadow: 0 0 4px rgba(246, 246, 246, 0.35);
   }
   80%,
   100% {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 10px rgba(224, 32, 32, 0.7);
+    box-shadow: 0 0 10px rgba(246, 246, 246, 0.7);
   }
 }
 

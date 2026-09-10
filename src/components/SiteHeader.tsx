@@ -814,8 +814,8 @@ export function SiteHeader({
         className="scroll-hint-wrap fixed bottom-[max(2.5%,env(safe-area-inset-bottom))] left-0 z-[60] flex flex-col gap-1.5 pointer-events-none max-md:left-[max(2vw,env(safe-area-inset-left))] max-md:right-auto max-md:w-full max-md:max-w-[calc(100vw-4vw)] md:right-[max(2vw,env(safe-area-inset-right))]"
         aria-hidden
       >
-        <span className="scroll-hint-label site-chrome-text block w-fit font-semibold uppercase leading-none tracking-[0.14em]">
-          SWIPE/SCROLL
+        <span className="scroll-hint-label site-chrome-text block w-fit font-semibold leading-none tracking-[0.14em]">
+          Swipe/scroll
         </span>
         <div className="scroll-hint-track">
           <div className="scroll-hint-beam" />
@@ -876,7 +876,7 @@ export function SiteHeader({
                     data-nav-href={item.href}
                     className="nav-link site-chrome-text w-fit shrink-0 cursor-auto whitespace-nowrap leading-none transition"
                   >
-                    <span className="nav-split-target inline-block overflow-hidden uppercase leading-none">
+                    <span className="nav-split-target nav-item-label inline-block overflow-hidden leading-none">
                       {item.label}
                     </span>
                   </button>
