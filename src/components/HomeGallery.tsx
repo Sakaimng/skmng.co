@@ -894,11 +894,10 @@ export function HomeGallery({
         <div className="flex h-screen w-max">
           {galleryItems.map(({ image, imageIndex, copyIndex }) => {
             const isMiddleSet = copyIndex === 1;
-            const isFirstVisible = isMiddleSet && imageIndex === initialLeadIndex;
-            const isInitialVisible =
-              isMiddleSet &&
+            const isOpeningVisible =
               imageIndex >= initialLeadIndex &&
               imageIndex < initialLeadIndex + 3;
+            const isInitialVisible = isMiddleSet && isOpeningVisible;
             const isNearInitial = isMiddleSet && imageIndex < initialLeadIndex + 5;
             const isIntroCard =
               isMiddleSet &&
@@ -934,12 +933,10 @@ export function HomeGallery({
                         isInitialVisible ? GALLERY_IMAGE_QUALITY : GALLERY_BACKGROUND_IMAGE_QUALITY
                       }
                       sizes="(max-width: 767px) 100vw, 33vw"
-                      preload={isFirstVisible}
-                      loading={isFirstVisible ? undefined : isNearInitial ? "eager" : "lazy"}
-                      fetchPriority={
-                        isFirstVisible ? undefined : isInitialVisible ? "high" : "low"
-                      }
-                      decoding="async"
+                      preload={isOpeningVisible && copyIndex === 0}
+                      loading={isOpeningVisible || isNearInitial ? "eager" : "lazy"}
+                      fetchPriority={isOpeningVisible ? "high" : "low"}
+                      decoding={isOpeningVisible ? "sync" : "async"}
                       draggable={false}
                       className="home-gallery-image pointer-events-none object-cover select-none"
                     />
