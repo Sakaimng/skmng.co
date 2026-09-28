@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { cache } from "react";
 
 import sharp from "sharp";
 
@@ -9,7 +10,7 @@ import type { WorkProject } from "@/lib/works";
 import { getProjectCategory } from "@/lib/works";
 
 /** Read intrinsic pixel size (header only — fast, cached by ISR). */
-async function readImageSize(
+const readImageSize = cache(async function readImageSize(
   filePath: string,
 ): Promise<{ width?: number; height?: number }> {
   try {
@@ -18,7 +19,7 @@ async function readImageSize(
   } catch {
     return {};
   }
-}
+});
 
 const ASSETS_DIR = path.join(process.cwd(), "public", "assets");
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif)$/i;
@@ -38,7 +39,9 @@ function workAssetKey(projectSlug: string, fileName: string) {
   return `${projectSlug}/${fileName}`;
 }
 
-async function readProjectDir(name: string): Promise<WorkProject | null> {
+const readProjectDir = cache(async function readProjectDir(
+  name: string,
+): Promise<WorkProject | null> {
   const dir = path.join(ASSETS_DIR, name);
   let entries: string[];
   try {
@@ -79,9 +82,9 @@ async function readProjectDir(name: string): Promise<WorkProject | null> {
     thumbnailUrl: getAssetUrl(workAssetKey(name, thumbnail)),
     images: imageEntries,
   };
-}
+});
 
-export async function getWorkProjects(): Promise<WorkProject[]> {
+const readWorkProjects = cache(async function readWorkProjects(): Promise<WorkProject[]> {
   let entries;
   try {
     entries = await fs.readdir(ASSETS_DIR, { withFileTypes: true });
@@ -106,6 +109,10 @@ export async function getWorkProjects(): Promise<WorkProject[]> {
       }
       return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
     });
+});
+
+export async function getWorkProjects(): Promise<WorkProject[]> {
+  return readWorkProjects();
 }
 
 export async function getWorkProject(slug: string): Promise<WorkProject | null> {

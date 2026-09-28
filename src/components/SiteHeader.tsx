@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { SplitText } from "gsap/SplitText";
 
 import {
   HOME_LEAVE_OUTRO_EVENT,
@@ -28,8 +27,6 @@ import { hideSiteChrome, shouldDeferChromeReveal } from "@/lib/siteChrome";
 import { clearWorkChrome, setWorkChrome } from "@/lib/workChrome";
 import { WORK_PROJECT_LOADING_EVENT, WORK_NAV_LOADING_FADE_OUT_S } from "@/lib/workNavEvents";
 
-gsap.registerPlugin(SplitText);
-
 const navItems = [
   { href: "/work", label: "Work" },
   { href: "/archive", label: "Archive" },
@@ -45,11 +42,6 @@ const MOBILE_MQ = "(max-width: 767px)";
 
 function isMobileViewport() {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_MQ).matches;
-}
-
-function revertSplits(splits: SplitText[] | null) {
-  if (!splits?.length) return;
-  splits.forEach((s) => s.revert());
 }
 
 function resetNavTargetText(targets: HTMLElement[]) {
@@ -217,7 +209,7 @@ export function SiteHeader({
   /** True once the label has faded in for the current loading session — prevents
    *  a re-fade flicker when the route changes (project→project) mid-load. */
   const workLoadingShownRef = useRef(false);
-  const splitsRef = useRef<SplitText[] | null>(null);
+  const navRevealActiveRef = useRef(false);
   const { navigate } = usePageTransition();
   const { messages } = useLocale();
   const [homeGalleryIntroDone, setHomeGalleryIntroDone] = useState(
@@ -609,7 +601,7 @@ export function SiteHeader({
         gsap.set(spanEl, { opacity: 1, y: 0 });
 
         const onEnter = () => {
-          if (splitsRef.current) return;
+          if (navRevealActiveRef.current) return;
           gsap.killTweensOf(spanEl);
           if (reduceMotion) {
             gsap.set(spanEl, { opacity: HOVER_OPACITY });
@@ -733,26 +725,22 @@ export function SiteHeader({
 
     if (!navTargets.length) return;
 
-    // CRITICAL: reset parent span opacity/visibility before SplitText.
-    // Case 1 left navTargets at autoAlpha:0 via inline style. If we split and
-    // animate words without resetting the parent, the animated words are visible
+    // CRITICAL: reset parent span opacity/visibility before wrapping the words.
+    // Case 1 left navTargets at autoAlpha:0 via inline style. If we wrap and
+    // animate them without resetting the parent, the animated words are visible
     // but their invisible parent container swallows them entirely.
     navTargets.forEach((el) => gsap.set(el, { autoAlpha: 1 }));
     resetNavItemText(navTargets);
 
-    const splits: SplitText[] = [];
-    const allWords: HTMLElement[] = [];
-
-    navTargets.forEach((el) => {
-      const split = new SplitText(el, {
-        type: "words",
-        wordsClass: "nav-split-word",
-      });
-      splits.push(split);
-      allWords.push(...(split.words as HTMLElement[]));
+    const allWords = navTargets.map((el, index) => {
+      const word = document.createElement("span");
+      word.className = "nav-split-word";
+      word.textContent = NAV_ITEM_LABELS[index] ?? "";
+      el.replaceChildren(word);
+      return word;
     });
 
-    splitsRef.current = splits;
+    navRevealActiveRef.current = true;
 
     gsap.set(allWords, { autoAlpha: 0, yPercent: 110 });
     gsap.to(allWords, {
@@ -762,8 +750,7 @@ export function SiteHeader({
       ease: "power3.out",
       stagger: 0.1,
       onComplete: () => {
-        revertSplits(splitsRef.current);
-        splitsRef.current = null;
+        navRevealActiveRef.current = false;
         resetNavItemText(navTargets);
         onLandingRevealDone?.();
       },
@@ -771,9 +758,8 @@ export function SiteHeader({
 
     return () => {
       gsap.killTweensOf(allWords);
-      if (splitsRef.current) {
-        revertSplits(splitsRef.current);
-        splitsRef.current = null;
+      if (navRevealActiveRef.current) {
+        navRevealActiveRef.current = false;
         resetNavItemText(navTargets);
       }
     };

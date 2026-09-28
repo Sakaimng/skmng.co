@@ -36,7 +36,7 @@ const SNAP_DEBOUNCE_MS = 140;
 const SNAP_ENABLE_DELAY_MS = 420;
 const MOBILE_BREAKPOINT_PX = 768;
 const GALLERY_IMAGE_QUALITY = 80;
-const GALLERY_BACKGROUND_IMAGE_QUALITY = 60;
+const GALLERY_BACKGROUND_IMAGE_QUALITY = 80;
 const CARD_TAP_MOVE_THRESHOLD_PX = 10;
 
 function clamp(value: number, min: number, max: number) {
@@ -52,8 +52,6 @@ export function HomeGallery({
 }) {
   const pathname = usePathname();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const scaleRafRef = useRef<number | null>(null);
-  const scaleLoopActiveRef = useRef(false);
   const idleTimeoutRef = useRef<number | null>(null);
   const introTimeoutRef = useRef<number | null>(null);
   const snapTimeoutRef = useRef<number | null>(null);
@@ -451,33 +449,37 @@ export function HomeGallery({
     let snapEnabled = false;
     let userDroveScroll = false;
     let snapEnableTimeoutId = 0;
+    let scaleInners: HTMLElement[] = [];
 
-    const getCards = () =>
-      Array.from(scroller.querySelectorAll<HTMLElement>(".home-gallery-card"));
+    const getScaleInners = () => {
+      if (!scaleInners.length) {
+        scaleInners = Array.from(
+          scroller.querySelectorAll<HTMLElement>(".home-gallery-scale-inner"),
+        );
+      }
+      return scaleInners;
+    };
 
     const resetFocusScales = () => {
-      scroller.querySelectorAll<HTMLElement>(".home-gallery-scale-inner").forEach((inner) => {
+      getScaleInners().forEach((inner) => {
         inner.style.transform = "scale3d(1, 1, 1)";
       });
     };
 
     const updateFocusScale = () => {
-      const scrollerRect = scroller.getBoundingClientRect();
-      const viewportCenter = scrollerRect.width / 2;
+      const viewportWidth = scroller.clientWidth;
+      const viewportCenter = viewportWidth / 2;
       const width = exactCardWidth();
-      if (!width || !scrollerRect.width) return false;
+      if (!width || !viewportWidth) return false;
 
-      const inners = scroller.querySelectorAll<HTMLElement>(".home-gallery-scale-inner");
+      const inners = getScaleInners();
       if (!inners.length) return false;
 
       const strength = width >= scroller.clientWidth * 0.95 ? 0.16 : 0.24;
+      const scrollLeft = scroller.scrollLeft;
 
-      inners.forEach((inner) => {
-        const card = inner.closest<HTMLElement>(".home-gallery-card");
-        if (!card) return;
-
-        const cardRect = card.getBoundingClientRect();
-        const cardCenter = cardRect.left - scrollerRect.left + cardRect.width / 2;
+      inners.forEach((inner, index) => {
+        const cardCenter = index * width - scrollLeft + width / 2;
         const signedOffset = (cardCenter - viewportCenter) / Math.max(width, 1);
         const distanceFromFocus = Math.min(1.35, Math.abs(signedOffset));
         const easedDistance = Math.pow(distanceFromFocus, 1.1);
@@ -487,26 +489,6 @@ export function HomeGallery({
       });
 
       return true;
-    };
-
-    const stopScaleLoop = () => {
-      scaleLoopActiveRef.current = false;
-      if (scaleRafRef.current != null) {
-        window.cancelAnimationFrame(scaleRafRef.current);
-        scaleRafRef.current = null;
-      }
-    };
-
-    const scaleLoop = () => {
-      if (!scaleLoopActiveRef.current) return;
-      updateFocusScale();
-      scaleRafRef.current = window.requestAnimationFrame(scaleLoop);
-    };
-
-    const startScaleLoop = () => {
-      stopScaleLoop();
-      scaleLoopActiveRef.current = true;
-      scaleLoop();
     };
 
     const exactCardWidth = () => {
@@ -631,7 +613,6 @@ export function HomeGallery({
         lastScrollLeft = nextScrollLeft;
       }
       syncLoopPosition();
-      updateFocusScale();
       scheduleFocusScaleUpdate();
       startIdleTimer();
       queueSnap();
@@ -716,7 +697,7 @@ export function HomeGallery({
       resetFocusScales();
       syncCardWidth();
       initializeLoop();
-      startScaleLoop();
+      scheduleFocusScaleUpdate();
     };
 
     setupGallery();
@@ -729,7 +710,7 @@ export function HomeGallery({
         syncCardWidth();
         initializeLoop();
         syncLoopPosition();
-        startScaleLoop();
+        scheduleFocusScaleUpdate();
       });
     });
 
@@ -784,7 +765,6 @@ export function HomeGallery({
       window.clearTimeout(snapEnableTimeoutId);
       cancelAnimationFrame(settleRafOuter);
       cancelAnimationFrame(settleRafInner);
-      stopScaleLoop();
       if (idleTimeoutRef.current) {
         window.clearTimeout(idleTimeoutRef.current);
       }

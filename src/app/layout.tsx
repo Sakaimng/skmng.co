@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { DeferredGlobalSiteHeader } from "@/components/DeferredGlobalSiteHeader";
 import { LocaleProvider } from "@/components/LocaleProvider";
@@ -11,13 +10,6 @@ import { localeInitScript } from "@/lib/locale";
 import faviconDark from "./skmng.coFaviconDarkMode.png";
 import faviconLight from "./skmng.coFaviconLightMode.png";
 import "./globals.css";
-
-/* Geist Sans is not preloaded: the UI uses Helvetica Neue from globals.css.
-   Loading it via next/font caused an unused <link rel="preload"> warning. */
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const siteTitle = "SKMNG | TOKYO BASED VISUAL STORYTELLER";
 
@@ -99,7 +91,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistMono.variable} dark h-full antialiased`}
+      className="dark h-full antialiased"
       suppressHydrationWarning
     >
       <body

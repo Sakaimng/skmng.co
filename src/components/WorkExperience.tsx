@@ -25,7 +25,7 @@ import {
   saveWorkTitlePins,
   type WorkTitlePins,
 } from "@/lib/workTitlePin";
-import { getWorkCoverSrc, preloadWorkCover } from "@/lib/workCoverImage";
+import { preloadWorkCover } from "@/lib/workCoverImage";
 import {
   clearWorkActiveSlug,
   clearWorkEntryCover,
@@ -494,6 +494,8 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
         return;
       }
 
+      const nextPath = workProjectPath(toSlug);
+      router.prefetch(nextPath);
       const overlay = overlayRef.current;
       const fromTitle = workTitleRefs.current.get(fromSlug);
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -503,7 +505,7 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
         commit();
         markWorkProjectEnter();
         markWorkProjectTitleReveal();
-        router.push(workProjectPath(toSlug));
+        router.push(nextPath);
       };
 
       if (reduceMotion || !overlay) {
@@ -628,7 +630,7 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
     if (selectedSlug) return;
 
     projects.forEach((project) => {
-      void preloadWorkCover(project.thumbnailUrl);
+      void preloadWorkCover(project.thumbnailUrl, "low");
     });
   }, [projects, selectedSlug]);
 
@@ -639,9 +641,10 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
       const row = rowRefs.current.get(slug);
       if (!row) return;
 
+      const nextPath = workProjectPath(slug);
+      router.prefetch(nextPath);
       const thumbUrl =
         projects.find((project) => project.slug === slug)?.thumbnailUrl ?? null;
-      const coverSrc = thumbUrl ? getWorkCoverSrc(thumbUrl) : null;
       const preloadThumb = thumbUrl
         ? preloadWorkCover(thumbUrl)
         : Promise.resolve();
@@ -649,7 +652,7 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
       selectingRef.current = true;
       setEntryBridgeSlug(slug);
       saveWorkEntryCoverSlug(slug);
-      if (coverSrc) saveWorkEntryCoverUrl(coverSrc);
+      if (thumbUrl) saveWorkEntryCoverUrl(thumbUrl);
 
       hoverSlugRef.current = slug;
       bgRef.current?.setActive(slug, true);
@@ -666,7 +669,7 @@ export function WorkExperience({ projects, selectedSlug }: WorkExperienceProps) 
       const navigate = () => {
         markWorkProjectEnter();
         void preloadThumb.then(() => {
-          router.push(workProjectPath(slug));
+          router.push(nextPath);
         });
       };
 

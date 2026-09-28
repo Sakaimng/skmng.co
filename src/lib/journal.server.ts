@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { cache } from "react";
 
 import {
   formatJournalDate,
@@ -60,7 +61,7 @@ function toTitle(paragraphs: string[]): string {
   return `${sentence.slice(0, 69).trimEnd()}…`;
 }
 
-async function readRecords(): Promise<JournalRecord[]> {
+const readRecords = cache(async function readRecords(): Promise<JournalRecord[]> {
   let files: string[];
   try {
     files = await fs.readdir(BLOGS_DIR);
@@ -99,7 +100,7 @@ async function readRecords(): Promise<JournalRecord[]> {
   return records
     .filter((record): record is JournalRecord => record !== null)
     .sort((a, b) => b.dateMs - a.dateMs);
-}
+});
 
 export async function getJournalEntries(): Promise<JournalListItem[]> {
   const records = await readRecords();

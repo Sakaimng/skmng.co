@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useSyncExternalStore } from "react";
 
+import { COVER_IMAGE_QUALITY } from "@/lib/imageQuality";
 import {
   getWorkEntryCoverSnapshot,
   subscribeWorkEntryCover,
@@ -26,14 +28,17 @@ export function WorkEntryBridge() {
       className="work-entry-bridge pointer-events-none fixed inset-0 z-[14]"
       aria-hidden
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={coverUrl}
         alt=""
+        fill
+        quality={COVER_IMAGE_QUALITY}
+        sizes="100vw"
+        loading="eager"
         draggable={false}
         decoding="sync"
         fetchPriority="high"
-        className="h-full w-full object-cover object-center"
+        className="object-cover object-center"
       />
     </div>
   );

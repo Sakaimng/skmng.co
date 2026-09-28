@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
@@ -80,10 +80,22 @@ export function LightboxCrossfadeImage({
     const next = (index + 1) % len;
     const prev = (index - 1 + len) % len;
     for (const i of [next, prev]) {
+      const image = images[i];
+      if (!image) continue;
+      const { props } = getImageProps({
+        src: image.url,
+        alt: "",
+        fill: true,
+        quality,
+        sizes: "100vw",
+      });
       const img = new window.Image();
-      img.src = images[i].url;
+      img.fetchPriority = "low";
+      if (props.srcSet) img.srcset = props.srcSet;
+      if (props.sizes) img.sizes = props.sizes;
+      img.src = props.src;
     }
-  }, [index, images]);
+  }, [index, images, quality]);
 
   // Stage the incoming image on the back layer (async commit — no flushSync).
   useLayoutEffect(() => {

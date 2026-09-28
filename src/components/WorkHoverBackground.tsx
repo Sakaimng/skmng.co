@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   forwardRef,
   useCallback,
@@ -10,7 +11,8 @@ import {
 } from "react";
 import { gsap } from "gsap";
 
-import { getWorkCoverSrc, preloadWorkCover } from "@/lib/workCoverImage";
+import { COVER_IMAGE_QUALITY } from "@/lib/imageQuality";
+import { preloadWorkCover } from "@/lib/workCoverImage";
 import type { WorkProject } from "@/lib/works";
 
 const WORK_BG_FADE_S = 0.32;
@@ -132,12 +134,6 @@ export const WorkHoverBackground = forwardRef<
   );
 
   useEffect(() => {
-    projects.forEach((project) => {
-      void preloadWorkCover(project.thumbnailUrl);
-    });
-  }, [projects]);
-
-  useEffect(() => {
     return () => {
       tweenRef.current?.kill();
     };
@@ -151,27 +147,31 @@ export const WorkHoverBackground = forwardRef<
         style={{ opacity: layerAOpacity }}
       >
         {urlA ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={getWorkCoverSrc(urlA)}
+          <Image
+            src={urlA}
             alt=""
+            fill
+            quality={COVER_IMAGE_QUALITY}
+            sizes="100vw"
             draggable={false}
             decoding="async"
             onLoad={handleImageLoad}
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="object-cover object-center"
           />
         ) : null}
       </div>
       <div ref={layerBRef} className="absolute inset-0 opacity-0">
         {urlB ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={getWorkCoverSrc(urlB)}
+          <Image
+            src={urlB}
             alt=""
+            fill
+            quality={COVER_IMAGE_QUALITY}
+            sizes="100vw"
             draggable={false}
             decoding="async"
             onLoad={handleImageLoad}
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="object-cover object-center"
           />
         ) : null}
       </div>

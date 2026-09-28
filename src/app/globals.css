@@ -260,7 +260,8 @@ header .nav-link .nav-split-target {
   position: relative;
 }
 
-header .nav-link .nav-item-label {
+header .nav-link .nav-item-label,
+header .nav-link .nav-item-label .nav-split-word {
   text-transform: none;
 }
 
@@ -437,6 +438,7 @@ header .nav-link .nav-split-target::after,
   height: 100vh;
   overflow: hidden;
   isolation: isolate;
+  contain: layout paint style;
 }
 
 /* Fixed frame — only the inner layer scales so black never shows at the edges */
@@ -726,6 +728,10 @@ header .nav-link .nav-split-target::after,
   animation: info-para-in 0.55s ease forwards;
 }
 
+.info-bio-grid p {
+  text-transform: none;
+}
+
 .journal-entry,
 .journal-entry p {
   text-transform: none;
@@ -908,12 +914,13 @@ html:not(.dark)
 
 .scroll-hint-beam {
   position: absolute;
+  left: 0;
   top: 0;
   bottom: 0;
   width: 38%;
   background: var(--site-chrome-scroll-beam);
   border-radius: 1px;
-  will-change: left, opacity;
+  will-change: transform, opacity;
   transition: background-color 0.45s ease;
   /* Piecewise easing below: ease-in → coast → ease-out (scroll-like) */
   animation: scroll-hint-sweep 3s infinite;
@@ -921,7 +928,7 @@ html:not(.dark)
 
 @keyframes scroll-hint-sweep {
   0% {
-    left: -38%;
+    transform: translate3d(-100%, 0, 0);
     opacity: 0.72;
     animation-timing-function: cubic-bezier(0,.91,1,.06);
   }
@@ -934,7 +941,7 @@ html:not(.dark)
     animation-timing-function: cubic-bezier(0,.91,1,.06);
   }
   100% {
-    left: 100%;
+    transform: translate3d(263.1579%, 0, 0);
     opacity: 0.72;
   }
 }
@@ -942,7 +949,7 @@ html:not(.dark)
 @media (prefers-reduced-motion: reduce) {
   .scroll-hint-beam {
     animation: none;
-    left: 31%;
+    transform: translate3d(81.5789%, 0, 0);
     width: 38%;
     opacity: 1;
   }

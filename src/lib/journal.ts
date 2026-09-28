@@ -24,20 +24,40 @@ const DATE_LOCALES: Record<Locale, string> = {
   ja: "ja-JP",
 };
 
-export function formatJournalDate(dateMs: number, locale: Locale = "en"): string {
-  return new Intl.DateTimeFormat(DATE_LOCALES[locale], {
+const DATE_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
+  en: new Intl.DateTimeFormat(DATE_LOCALES.en, {
     timeZone: "Asia/Tokyo",
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(new Date(dateMs));
-}
+  }),
+  ja: new Intl.DateTimeFormat(DATE_LOCALES.ja, {
+    timeZone: "Asia/Tokyo",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }),
+};
 
-export function formatJournalTime(dateMs: number, locale: Locale = "en"): string {
-  return new Intl.DateTimeFormat(DATE_LOCALES[locale], {
+const TIME_FORMATTERS: Record<Locale, Intl.DateTimeFormat> = {
+  en: new Intl.DateTimeFormat(DATE_LOCALES.en, {
     timeZone: "Asia/Tokyo",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(new Date(dateMs));
+  }),
+  ja: new Intl.DateTimeFormat(DATE_LOCALES.ja, {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }),
+};
+
+export function formatJournalDate(dateMs: number, locale: Locale = "en"): string {
+  return DATE_FORMATTERS[locale].format(dateMs);
+}
+
+export function formatJournalTime(dateMs: number, locale: Locale = "en"): string {
+  return TIME_FORMATTERS[locale].format(dateMs);
 }

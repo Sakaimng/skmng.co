@@ -194,6 +194,8 @@ export function PageTransitionProvider({
     (href: string) => {
       if (href === currentPathRef.current || navigatingRef.current) return;
       navigatingRef.current = true;
+      // Fetch the next RSC payload while the existing leave animation runs.
+      router.prefetch(href);
       const targets = getPageTargets();
 
       if (!targets.length) {

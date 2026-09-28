@@ -13,10 +13,7 @@ import {
 
 import { WorkProjectGallery } from "@/components/WorkProjectGallery";
 import { COVER_IMAGE_QUALITY } from "@/lib/imageQuality";
-import {
-  getWorkCoverSrc,
-  releaseWorkCoverAfterPaint,
-} from "@/lib/workCoverImage";
+import { releaseWorkCoverAfterPaint } from "@/lib/workCoverImage";
 import { clearWorkEntryCover } from "@/lib/workNavEvents";
 import type { WorkProject } from "@/lib/works";
 import { getOrderedProjects } from "@/lib/works";
@@ -889,11 +886,6 @@ export const WorkProjectScroll = memo(function WorkProjectScroll({
     return () => ro.disconnect();
   }, [getScrollEndElement, handleImageLayout, project.slug]);
 
-  const coverSrc = useMemo(
-    () => getWorkCoverSrc(project.thumbnailUrl),
-    [project.thumbnailUrl],
-  );
-
   return (
     <div className="work-project-scroll relative z-10 w-full">
       <div ref={scrollInnerRef} className="work-project-scroll-inner">
@@ -906,14 +898,18 @@ export const WorkProjectScroll = memo(function WorkProjectScroll({
             className="work-project-hero relative h-[100dvh] w-full shrink-0"
           >
             {!heroLoaded ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={coverSrc}
+              <Image
+                src={project.thumbnailUrl}
                 alt=""
                 aria-hidden
+                fill
+                quality={COVER_IMAGE_QUALITY}
+                sizes="100vw"
+                loading="eager"
+                fetchPriority="high"
                 draggable={false}
                 decoding="sync"
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
+                className="pointer-events-none object-cover object-center"
               />
             ) : null}
             <Image
