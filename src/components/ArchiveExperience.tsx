@@ -163,18 +163,18 @@ function computeWindow(
   scrollTop: number,
   rowPitch: number,
   viewportH: number,
-  maxGlobalRow: number,
 ): { rMin: number; rMax: number } {
   if (!rowPitch) return { rMin: 0, rMax: 0 };
   const vh = viewportH > 0 ? viewportH : ARCHIVE_LAYOUT_SNAPSHOT_VH;
-  const rPixelTop = scrollTop;
-  const rPixelBottom = scrollTop + vh;
-  let r0 = Math.floor(rPixelTop / rowPitch) - BUFFER_ROWS;
-  let r1 = Math.ceil(rPixelBottom / rowPitch - 1e-9) + BUFFER_ROWS;
-  r0 = Math.max(0, r0);
-  r1 = Math.min(maxGlobalRow, r1);
+  const r0 = Math.floor(scrollTop / rowPitch) - BUFFER_ROWS;
+  let r1 = Math.ceil((scrollTop + vh) / rowPitch - 1e-9) + BUFFER_ROWS;
   if (r1 < r0) r1 = r0;
   return { rMin: r0, rMax: r1 };
+}
+
+/** Pinned-grid translate: screen position follows content scroll, not the native loop jump. */
+function archiveGridTranslateY(rMin: number, rowPitch: number, contentScroll: number) {
+  return rMin * rowPitch - contentScroll;
 }
 
 function mod(n: number, m: number) {
@@ -430,6 +430,14 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
   const gridRootRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const periodRef = useRef(0);
+  /**
+   * Native scroll is recentered by one period at the loop. This shift keeps the
+   * content coordinate — and the pinned grid — continuous across that recenter.
+   */
+  const loopShiftRef = useRef(0);
+  const loopLockRef = useRef(false);
+  /** rMin of the cells currently committed. Transform stays on this until they swap. */
+  const committedRMinRef = useRef(0);
   const introCtxRef = useRef<ReturnType<typeof gsap.context> | null>(null);
   const scrollFrameRef = useRef(0);
   const pointerMoveRafRef = useRef(0);
@@ -732,16 +740,9 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
     layoutMetricsRef.current = { rowPitch, vh: vhForWindow, maxGlobalRow };
   }, [rowPitch, vhForWindow, maxGlobalRow]);
 
-  useLayoutEffect(() => {
-    const sc = scrollerRef.current;
-    if (!sc) return;
-    const w = computeWindow(sc.scrollTop, rowPitch, vhForWindow, maxGlobalRow);
-    lastVirtualWindowRef.current = { rMin: w.rMin, rMax: w.rMax };
-  }, [rowPitch, vhForWindow, maxGlobalRow]);
-
   const { rMin, rMax } = useMemo(
-    () => computeWindow(scrollTop, rowPitch, vhForWindow, maxGlobalRow),
-    [scrollTop, rowPitch, vhForWindow, maxGlobalRow],
+    () => computeWindow(scrollTop, rowPitch, vhForWindow),
+    [scrollTop, rowPitch, vhForWindow],
   );
 
   useLayoutEffect(() => {
@@ -758,12 +759,45 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
 
   const rowsInWindow = rMax - rMin + 1;
 
+  const contentScrollNow = useCallback(() => {
+    const sc = scrollerRef.current;
+    if (!sc) return 0;
+    return sc.scrollTop + loopShiftRef.current;
+  }, []);
+
+  const pinArchiveGrid = useCallback(() => {
+    const grid = gridRef.current;
+    const pitch = layoutMetricsRef.current.rowPitch;
+    if (!grid || !(pitch > 0)) return;
+    const y = archiveGridTranslateY(committedRMinRef.current, pitch, contentScrollNow());
+    grid.style.transform = `translate3d(0px, ${y}px, 0px)`;
+  }, [contentScrollNow]);
+
+  const normalizeArchiveLoop = useCallback(() => {
+    const sc = scrollerRef.current;
+    const p = periodRef.current;
+    if (!sc || !(p > 0) || loopLockRef.current) return;
+    const raw = sc.scrollTop;
+    const min = p * 0.5;
+    const max = p * 1.5;
+    if (raw >= min && raw <= max) return;
+    const periods =
+      raw > max
+        ? Math.ceil((raw - max) / p - 1e-9)
+        : -Math.ceil((min - raw) / p - 1e-9);
+    if (!periods) return;
+    loopLockRef.current = true;
+    loopShiftRef.current += periods * p;
+    sc.scrollTop = raw - periods * p;
+    loopLockRef.current = false;
+  }, []);
+
   const applyColumnWave = useCallback(() => {
     const sc = scrollerRef.current;
     const grid = gridRef.current;
     if (!sc || !grid) return false;
 
-    const scroll = sc.scrollTop;
+    const scroll = sc.scrollTop + loopShiftRef.current;
     const colCount = cols;
 
     if (
@@ -828,48 +862,25 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
     scrollFrameRef.current = 0;
 
     const sc = scrollerRef.current;
-    const grid = gridRef.current;
-    const p = periodRef.current;
-    if (!sc || !p) return;
+    if (!sc) return;
 
-    const prevScroll = sc.scrollTop;
-    let jumped = false;
-    if (prevScroll < p * 0.5) {
-      sc.scrollTop = prevScroll + p;
-      jumped = true;
-    } else if (prevScroll > p * 1.5) {
-      sc.scrollTop = prevScroll - p;
-      jumped = true;
-    }
-    const next = sc.scrollTop;
-    const scrollDelta = next - prevScroll;
-
-    if (jumped && grid) {
-      if (colWaveYRef.current.length === cols) {
-        colWaveYRef.current = colWaveYRef.current.map((y) => y + scrollDelta);
-      } else {
-        colWaveYRef.current = Array(cols).fill(next);
-      }
-      const m = layoutMetricsRef.current;
-      const w = computeWindow(next, m.rowPitch, m.vh, m.maxGlobalRow);
-      lastVirtualWindowRef.current = { rMin: w.rMin, rMax: w.rMax };
-      grid.style.transform = `translate3d(0, ${w.rMin * m.rowPitch}px, 0)`;
-      setScrollTop(next);
-    }
-
+    normalizeArchiveLoop();
+    const content = sc.scrollTop + loopShiftRef.current;
     const m = layoutMetricsRef.current;
-    const w = computeWindow(next, m.rowPitch, m.vh, m.maxGlobalRow);
+    const w = computeWindow(content, m.rowPitch, m.vh);
     const prev = lastVirtualWindowRef.current;
     if (w.rMin !== prev.rMin || w.rMax !== prev.rMax) {
       lastVirtualWindowRef.current = { rMin: w.rMin, rMax: w.rMax };
-      setScrollTop(next);
+      setScrollTop(content);
     }
+
+    pinArchiveGrid();
 
     const animating = applyColumnWave();
     if (animating && !scrollFrameRef.current) {
       scrollFrameRef.current = requestAnimationFrame(tickArchiveScroll);
     }
-  }, [applyColumnWave, cols]);
+  }, [applyColumnWave, normalizeArchiveLoop, pinArchiveGrid]);
 
   const scheduleScrollFrame = useCallback(() => {
     if (scrollFrameRef.current) return;
@@ -887,6 +898,9 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
     if (!sc) return;
     let hoverDebounce: ReturnType<typeof setTimeout> | undefined;
     const onScroll = () => {
+      if (loopLockRef.current) return;
+      normalizeArchiveLoop();
+      pinArchiveGrid();
       scheduleScrollFrame();
       if (!pointerInsideRef.current) return;
       clearTimeout(hoverDebounce);
@@ -908,7 +922,7 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
       if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current);
       scrollFrameRef.current = 0;
     };
-  }, [retargetHoverFromLastPointer, scheduleScrollFrame]);
+  }, [normalizeArchiveLoop, pinArchiveGrid, retargetHoverFromLastPointer, scheduleScrollFrame]);
 
   useEffect(() => {
     colWaveYRef.current = [];
@@ -925,13 +939,20 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
     const rc = Math.max(1, Math.ceil(images.length / cols));
     const p = rc * rowPitchNow;
     if (!p) return;
+    loopShiftRef.current = 0;
     sc.scrollTop = p;
-    const maxG = rc * 3 - 1;
-    const w = computeWindow(p, rowPitchNow, vh, maxG);
+    const w = computeWindow(p, rowPitchNow, vh);
     lastVirtualWindowRef.current = { rMin: w.rMin, rMax: w.rMax };
+    committedRMinRef.current = w.rMin;
     // Mirror DOM scroll into virtual window state before the archive grid intro.
     setScrollTop(p);
   }, [layoutKey, images.length, cols, rowHeight]);
+
+  useLayoutEffect(() => {
+    committedRMinRef.current = rMin;
+    lastVirtualWindowRef.current = { rMin, rMax };
+    pinArchiveGrid();
+  });
 
   useLayoutEffect(() => {
     const grid = gridRef.current;
@@ -1527,9 +1548,9 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
               <div
                 ref={gridRef}
                 role="presentation"
-                className="archive-grid pointer-events-auto absolute left-0 right-0 w-full"
+                className="archive-grid pointer-events-auto sticky top-0 left-0 right-0 w-full"
                 style={{
-                  transform: `translate3d(0px, ${rMin * rowPitch}px, 0px)`,
+                  transform: `translate3d(0px, ${archiveGridTranslateY(rMin, rowPitch, scrollTop)}px, 0px)`,
                   height: gridWindowHeight,
                   gridTemplateRows: `repeat(${rowsInWindow}, ${rh}px)`,
                   contain: "layout paint style",
