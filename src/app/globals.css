@@ -547,25 +547,8 @@ header .nav-link .nav-split-target::after,
   touch-action: none;
 }
 
-@supports (content-visibility: auto) {
-  .archive-grid-card {
-    content-visibility: auto;
-    contain-intrinsic-size: calc(
-      (100dvh - (var(--archive-visible-rows) - 1) * var(--archive-grid-gap)) /
-        var(--archive-visible-rows)
-    );
-  }
-}
-
-@media (max-width: 767px) {
-  .archive-grid-card {
-    content-visibility: visible;
-  }
-}
-
-/* During GSAP landing: `content-visibility: auto` fights clip-path on many tiles in Chrome. */
+/* Keep the buffered virtual rows painted so entering tiles never stall scrolling. */
 .archive-grid[data-archive-intro="1"] .archive-grid-card {
-  content-visibility: visible;
   transition: none;
 }
 
@@ -591,6 +574,30 @@ header .nav-link .nav-split-target::after,
   overflow: hidden;
   transition: opacity 0.35s ease;
   contain: layout style;
+}
+
+.archive-grid-card[data-archive-col="0"] {
+  transform: translate3d(0, var(--archive-wave-y-0, 0px), 0);
+}
+
+.archive-grid-card[data-archive-col="1"] {
+  transform: translate3d(0, var(--archive-wave-y-1, 0px), 0);
+}
+
+.archive-grid-card[data-archive-col="2"] {
+  transform: translate3d(0, var(--archive-wave-y-2, 0px), 0);
+}
+
+.archive-grid-card[data-archive-col="3"] {
+  transform: translate3d(0, var(--archive-wave-y-3, 0px), 0);
+}
+
+.archive-grid-card[data-archive-col="4"] {
+  transform: translate3d(0, var(--archive-wave-y-4, 0px), 0);
+}
+
+.archive-grid-card[data-archive-col="5"] {
+  transform: translate3d(0, var(--archive-wave-y-5, 0px), 0);
 }
 
 .archive-grid[data-archive-wave="1"] .archive-grid-card {

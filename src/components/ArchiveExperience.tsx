@@ -46,10 +46,10 @@ const BUFFER_ROWS = 2;
 const ARCHIVE_VISIBLE_ROWS = 3;
 /** Grid gap — must match `--archive-grid-gap` / `.archive-grid { gap }` */
 const GRID_GAP = 1;
-/** Per-column scroll chase — lower = more lag (wave). */
-const WAVE_COL_SMOOTH_STEP = 0.028;
-const WAVE_SMOOTH_BASE = 0.2;
-const WAVE_SMOOTH_MIN = 0.05;
+/** Responsive per-column chase: keeps the wave without trailing input for seconds. */
+const WAVE_COL_SMOOTH_STEP = 0.022;
+const WAVE_SMOOTH_BASE = 0.26;
+const WAVE_SMOOTH_MIN = 0.12;
 const WAVE_SETTLE_PX = 0.35;
 /** Stable viewport for SSR + first client paint — real metrics applied in layout effects only */
 const ARCHIVE_LAYOUT_SNAPSHOT_VH = 800;
@@ -82,23 +82,22 @@ function columnWaveSmoothFactor(col: number): number {
   return Math.max(WAVE_SMOOTH_MIN, WAVE_SMOOTH_BASE - col * WAVE_COL_SMOOTH_STEP);
 }
 
-function chaseColumnWaveScroll(
+function updateColumnWave(
   scrollTop: number,
   colCount: number,
   colY: number[],
+  offsets: number[],
 ): boolean {
   let animating = false;
+  offsets.length = colCount;
   for (let c = 0; c < colCount; c++) {
     const prev = colY[c] ?? scrollTop;
     const next = prev + (scrollTop - prev) * columnWaveSmoothFactor(c);
     colY[c] = next;
+    offsets[c] = scrollTop - next;
     if (Math.abs(scrollTop - next) > WAVE_SETTLE_PX) animating = true;
   }
   return animating;
-}
-
-function columnWaveOffsets(scrollTop: number, colY: number[]): number[] {
-  return colY.map((y) => scrollTop - y);
 }
 
 /** Archive -> lightbox transition timings. */
@@ -437,7 +436,6 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
   const pendingPointerMoveRef = useRef<{ x: number; y: number } | null>(null);
   const colWaveYRef = useRef<number[]>([]);
   const waveOffsetsRef = useRef<number[]>([]);
-  const waveCardsByColRef = useRef<HTMLElement[][]>([]);
   const lastAppliedWaveOffsetsRef = useRef<number[]>([]);
 
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
@@ -760,21 +758,6 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
 
   const rowsInWindow = rMax - rMin + 1;
 
-  useLayoutEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-
-    const byCol = Array.from({ length: cols }, () => [] as HTMLElement[]);
-    grid.querySelectorAll<HTMLElement>("button.archive-grid-card").forEach((card) => {
-      const col = Number(card.dataset.archiveCol);
-      if (Number.isFinite(col) && col >= 0 && col < cols) {
-        byCol[col]!.push(card);
-      }
-    });
-    waveCardsByColRef.current = byCol;
-    lastAppliedWaveOffsetsRef.current = [];
-  }, [rMin, rMax, cols, rowsInWindow, images.length]);
-
   const applyColumnWave = useCallback(() => {
     const sc = scrollerRef.current;
     const grid = gridRef.current;
@@ -788,56 +771,60 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
       waveDisabledRef.current ||
       sc.getAttribute("data-archive-landing") === "1"
     ) {
-      colWaveYRef.current = Array(colCount).fill(scroll);
-      waveOffsetsRef.current = Array(colCount).fill(0);
-      archiveLayoutRef.current.waveOffsets = waveOffsetsRef.current;
-      const byCol = waveCardsByColRef.current;
+      const colY = colWaveYRef.current;
+      const offsets = waveOffsetsRef.current;
+      colY.length = colCount;
+      offsets.length = colCount;
+      const last = lastAppliedWaveOffsetsRef.current;
       for (let c = 0; c < colCount; c++) {
-        const cards = byCol[c];
-        if (!cards) continue;
-        for (let i = 0; i < cards.length; i++) {
-          cards[i]!.style.transform = "translateZ(0)";
-        }
+        colY[c] = scroll;
+        offsets[c] = 0;
+        if (last[c] === 0) continue;
+        grid.style.setProperty(`--archive-wave-y-${c}`, "0px");
+        last[c] = 0;
       }
-      lastAppliedWaveOffsetsRef.current = Array(colCount).fill(0);
-      grid.removeAttribute("data-archive-wave");
+      archiveLayoutRef.current.waveOffsets = offsets;
+      if (grid.hasAttribute("data-archive-wave")) {
+        grid.removeAttribute("data-archive-wave");
+      }
       return false;
     }
 
     if (colWaveYRef.current.length !== colCount) {
       colWaveYRef.current = Array(colCount).fill(scroll);
+      waveOffsetsRef.current = Array(colCount).fill(0);
       lastAppliedWaveOffsetsRef.current = [];
     }
 
-    const animating = chaseColumnWaveScroll(scroll, colCount, colWaveYRef.current);
-    const offsets = columnWaveOffsets(scroll, colWaveYRef.current);
-    waveOffsetsRef.current = offsets;
+    const offsets = waveOffsetsRef.current;
+    const animating = updateColumnWave(
+      scroll,
+      colCount,
+      colWaveYRef.current,
+      offsets,
+    );
     archiveLayoutRef.current.waveOffsets = offsets;
 
     const last = lastAppliedWaveOffsetsRef.current;
-    const byCol = waveCardsByColRef.current;
     for (let c = 0; c < colCount; c++) {
       const oy = offsets[c] ?? 0;
       if (last[c] === oy) continue;
       last[c] = oy;
-      const transform = `translate3d(0,${oy}px,0) translateZ(0)`;
-      const cards = byCol[c];
-      if (!cards) continue;
-      for (let i = 0; i < cards.length; i++) {
-        cards[i]!.style.transform = transform;
-      }
+      grid.style.setProperty(`--archive-wave-y-${c}`, `${oy}px`);
     }
 
     if (animating) {
-      grid.setAttribute("data-archive-wave", "1");
-    } else {
+      if (!grid.hasAttribute("data-archive-wave")) {
+        grid.setAttribute("data-archive-wave", "1");
+      }
+    } else if (grid.hasAttribute("data-archive-wave")) {
       grid.removeAttribute("data-archive-wave");
     }
 
     return animating;
   }, [cols, reduceMotion]);
 
-  const runScrollFrame = useCallback(() => {
+  const runScrollFrame = useCallback(function tickArchiveScroll() {
     scrollFrameRef.current = 0;
 
     const sc = scrollerRef.current;
@@ -880,7 +867,7 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
 
     const animating = applyColumnWave();
     if (animating && !scrollFrameRef.current) {
-      scrollFrameRef.current = requestAnimationFrame(runScrollFrame);
+      scrollFrameRef.current = requestAnimationFrame(tickArchiveScroll);
     }
   }, [applyColumnWave, cols]);
 
@@ -943,7 +930,6 @@ export function ArchiveExperience({ images }: { images: AssetImage[] }) {
     const w = computeWindow(p, rowPitchNow, vh, maxG);
     lastVirtualWindowRef.current = { rMin: w.rMin, rMax: w.rMax };
     // Mirror DOM scroll into virtual window state before the archive grid intro.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setScrollTop(p);
   }, [layoutKey, images.length, cols, rowHeight]);
 
