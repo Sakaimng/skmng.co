@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 
 import { InfoExperience } from "@/components/InfoExperience";
 import { JournalArticle } from "@/components/JournalArticle";
+import { JournalPasswordForm } from "@/components/JournalPasswordForm";
+import { isJournalUnlocked } from "@/lib/journalGate.server";
 import { getJournalEntries, getJournalEntry } from "@/lib/journal.server";
 import { defaultOgImagePath } from "@/lib/site";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 type JournalEntryPageProps = {
   params: Promise<{ slug: string }>;
@@ -20,11 +22,18 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: JournalEntryPageProps): Promise<Metadata> {
+  if (!(await isJournalUnlocked())) {
+    return {
+      title: "Journal",
+      robots: { index: false, follow: false },
+    };
+  }
+
   const { slug } = await params;
   const entry = await getJournalEntry(slug);
 
   if (!entry) {
-    return { title: "Journal" };
+    return { title: "Journal", robots: { index: false, follow: false } };
   }
 
   const canonical = `/journal/${entry.slug}`;
@@ -43,11 +52,23 @@ export async function generateMetadata({
       title: `${entry.dateLabel} | SKMNG`,
       description: entry.paragraphs[0] ?? entry.title,
     },
+    robots: { index: false, follow: false },
   };
 }
 
 export default async function JournalEntryPage({ params }: JournalEntryPageProps) {
   const { slug } = await params;
+
+  if (!(await isJournalUnlocked())) {
+    return (
+      <main className="overflow-x-hidden overflow-y-hidden bg-background">
+        <InfoExperience>
+          <JournalPasswordForm nextPath={`/journal/${slug}`} />
+        </InfoExperience>
+      </main>
+    );
+  }
+
   const entry = await getJournalEntry(slug);
 
   if (!entry) notFound();

@@ -746,6 +746,55 @@ header .nav-link .nav-split-target::after,
   text-transform: none;
 }
 
+.journal-password-input {
+  text-transform: none;
+  caret-color: var(--foreground);
+}
+
+.journal-password-input[data-error="1"] {
+  caret-color: transparent;
+}
+
+.journal-password-error {
+  position: absolute;
+  inset: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  pointer-events: none;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--foreground);
+  opacity: 1;
+  animation: journal-password-error-in 0.2s ease;
+  transition: opacity 0.4s ease;
+}
+
+.journal-password-error[data-fade="out"] {
+  opacity: 0;
+}
+
+@keyframes journal-password-error-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journal-password-error {
+    animation: none;
+    transition: none;
+  }
+}
+
+.journal-index-below {
+  scrollbar-width: none;
+}
+
+.journal-index-below::-webkit-scrollbar {
+  display: none;
+}
+
 .work-title-reveal {
   clip-path: inset(0 0 100% 0);
   animation: work-title-reveal 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;

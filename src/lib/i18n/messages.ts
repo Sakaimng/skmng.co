@@ -29,6 +29,9 @@ export const messages = {
       close: "CLOSE",
       older: "OLDER",
       newer: "NEWER",
+      password: "Password",
+      enter: "Enter",
+      incorrectPassword: "Incorrect password",
     },
     a11y: {
       switchToJapanese: "Switch to Japanese",
@@ -68,6 +71,9 @@ export const messages = {
       close: "閉じる",
       older: "古い",
       newer: "新しい",
+      password: "パスワード",
+      enter: "入る",
+      incorrectPassword: "パスワードが違います",
     },
     a11y: {
       switchToJapanese: "日本語に切り替え",
