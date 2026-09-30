@@ -51,7 +51,7 @@ export function ContactEmailCopy({ email }: ContactEmailCopyProps) {
   };
 
   return (
-    <div>
+    <div className="relative w-fit">
       <button
         ref={buttonRef}
         type="button"
@@ -64,7 +64,7 @@ export function ContactEmailCopy({ email }: ContactEmailCopyProps) {
       {copied ? (
         <p
           role="status"
-          className="mt-[9px] leading-none tracking-[0.12em] text-foreground"
+          className="pointer-events-none absolute top-0 left-full m-0 ml-[0.65em] whitespace-nowrap leading-none tracking-[0.12em] text-foreground"
           aria-live="polite"
         >
           {messages.info.copied}
